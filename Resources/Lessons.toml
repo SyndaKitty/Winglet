@@ -1,0 +1,11 @@
+﻿[[lessons]]
+id=1
+name="Basic Single Syllable Word Drill"
+description=""
+content_file="lesson01.txt"
+
+[[lessons]]
+id=2
+name="Combined Left Hand Consonants"
+description=""
+content_file="lesson02.txt"
