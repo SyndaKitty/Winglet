@@ -6,7 +6,10 @@ Window.Create(new WindowSettings {
     Width = screenWidth,
     Height = screenHeight,
     Title = "Wingman",
-    TargetFPS = targetFPS
+    TargetFPS = targetFPS,
+    MinSize = (400, 300),
+    Resizable = true,
+    VSync = true,
 });
 
 Window.Run(new PracticeScene("Resources/Lessons/lesson01.txt"));

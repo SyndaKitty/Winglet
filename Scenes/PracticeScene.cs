@@ -16,6 +16,7 @@ public class PracticeScene : Scene
     public PracticeScene(string lessonFilepath)
     {
         lessonPath = lessonFilepath;
+        words = new();
     }
 
     public void Load() 
@@ -33,7 +34,7 @@ public class PracticeScene : Scene
     
     public void Draw() 
     {
-        Vector2 origin = new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2 - primaryFont.BaseSize / 2);
+        Vector2 origin = new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2 - primaryFont.BaseSize);
         Vector2 cursor = origin;
 
         Word word = words[wordIndex];
@@ -42,7 +43,7 @@ public class PracticeScene : Scene
         for (int i = wordIndex; i < words.Count; i++)
         {
             word = words[i];
-            int width = DrawWord(word, cursor);
+            int width = DrawWord(word, cursor, false);
             cursor.X += width;
 
             if (cursor.X > GetScreenWidth()) break;
@@ -53,7 +54,7 @@ public class PracticeScene : Scene
         {
             word = words[i];
             cursor.X -= GetWordWidth(word);
-            DrawWord(word, cursor);
+            DrawWord(word, cursor, true);
 
             if (cursor.X < 0) break;
         }
@@ -99,30 +100,6 @@ public class PracticeScene : Scene
             }
             key = GetKeyPressed();
         }
-
-        //int key = GetKeyPressed();
-        //while (key > 0)
-        //{
-        //    if (key == (int)KeyboardKey.Backspace)
-        //    {
-        //        Console.WriteLine("Backspace");
-        //        Backspace();
-        //    }
-        //    else if ((char)key == ' ')
-        //    {
-        //        Console.WriteLine("' '");
-        //        if (words[wordIndex].InputBuffer.Length > 0)
-        //        {
-        //            wordIndex = Math.Min(wordIndex + 1, words.Count - 1);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        Console.WriteLine(key + " " + (char)key + " " + ((char)key).ToString().ToLower());
-        //        words[wordIndex].InputBuffer.Append(((char)key).ToString().ToLower());
-        //    }
-        //    key = GetKeyPressed();
-        //}
 
         if (IsKeyPressedRepeat(KeyboardKey.Backspace))
         {
@@ -171,10 +148,18 @@ public class PracticeScene : Scene
         return GetTextWidth(text + " ");
     }
 
-    int DrawWord(Word word, Vector2 pos)
+    void DrawInputBuffer(Word word, Vector2 pos)
+    {
+        DrawTextEx(primaryFont, word.InputBuffer.ToString(), pos, primaryFont.BaseSize, 0, Shared.AltTextColor);
+    }
+
+    int DrawWord(Word word, Vector2 pos, bool visited)
     {
         string text = word.Text;
         StringBuilder buffer = word.InputBuffer;
+
+        DrawInputBuffer(word, pos);
+        pos.Y += primaryFont.BaseSize;
 
         int totalWidth = 0;
 
@@ -212,6 +197,15 @@ public class PracticeScene : Scene
             int width = GetTextWidth(str);
             pos.X += width;
             totalWidth += width;
+        }
+
+        if (visited && word.Text != word.InputBuffer.ToString())
+        {
+            // Move cursor back to the start of the word, and down
+            pos.X -= totalWidth;
+            pos.Y += primaryFont.BaseSize;
+
+            DrawRectangle((int)pos.X, (int)pos.Y, totalWidth, 5, Shared.ErrTextColor);
         }
 
         return totalWidth + GetTextWidth(" ");

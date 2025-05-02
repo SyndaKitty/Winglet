@@ -10,7 +10,16 @@ public static class Window
     {
         Log.Info("Window", $"Creating window {settings.Title ?? ""} ({settings.Width}x{settings.Height}) @ {settings.TargetFPS} Hz");
         InitWindow(settings.Width, settings.Height, settings.Title ?? "");
+        SetWindowMinSize(settings.MinSize.Item1, settings.MinSize.Item2);
         SetTargetFPS(settings.TargetFPS ?? 60);
+        if (settings.Resizable)
+        {
+            SetWindowState(ConfigFlags.ResizableWindow);
+        }
+        if (settings.VSync)
+        {
+            SetWindowState(ConfigFlags.VSyncHint);
+        }
         MaximizeWindow();
     }
 
@@ -56,5 +65,7 @@ public struct WindowSettings
     public int Height;
     public int? TargetFPS;
     public string? Title;
-
+    public (int, int) MinSize;
+    public bool Resizable;
+    public bool VSync;
 }
