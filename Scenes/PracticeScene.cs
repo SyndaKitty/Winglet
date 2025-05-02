@@ -8,10 +8,22 @@ public class PracticeScene : Scene
     const string Tag = "PracticeScene";
 
     Font primaryFont = Shared.GetFont(Shared.PrimaryFontFile, 80);
+    Font secondaryFont = Shared.GetFont(Shared.SecondaryFontFile, 80);
     string lessonPath;
     List<Word> words;
 
+    bool complete = false;
+    float timeSinceComplete = 0f;
+
     int wordIndex = 0;
+    float xOffset = 0; // Used for horizontal smooth scrolling
+    float smoothProgressPercent = 0;
+
+    bool timerRunning = false;
+    float timer = 0;
+    float timeSinceType = 0;
+    const float StopTimingThreshold = 5f;
+
 
     public PracticeScene(string lessonFilepath)
     {
@@ -36,10 +48,13 @@ public class PracticeScene : Scene
     {
         Vector2 origin = new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2 - primaryFont.BaseSize);
         Vector2 cursor = origin;
+        cursor.X += xOffset;
 
+        // Draw cursor
         Word word = words[wordIndex];
-        DrawRectangle((int)origin.X + GetWordWidth(word, true), (int)origin.Y, 2, primaryFont.BaseSize, Shared.AccentColor);
+        DrawRectangle((int)cursor.X + GetWordWidth(word, true), (int)cursor.Y, 2, primaryFont.BaseSize, Shared.AccentColor);
         
+        // Draw words
         for (int i = wordIndex; i < words.Count; i++)
         {
             word = words[i];
@@ -50,6 +65,7 @@ public class PracticeScene : Scene
         }
 
         cursor = origin;
+        cursor.X += xOffset;
         for (int i = wordIndex - 1; i >= 0 && i < words.Count; i--)
         {
             word = words[i];
@@ -59,11 +75,36 @@ public class PracticeScene : Scene
             if (cursor.X < 0) break;
         }
 
+        // Draw progress bar
+        const int progressBarHeight = 20;
+        float progressPercent = (float)wordIndex / words.Count;
+        if (complete)
+        {
+            // If we are done, set progress to 100%
+            progressPercent = 1;
+        }
+        smoothProgressPercent = ExpDecay(smoothProgressPercent, progressPercent, 15, GetFrameTime());
+        int progressPixels = (int)(GetScreenWidth() * smoothProgressPercent);
+        DrawRectangle(0, GetScreenHeight() - progressBarHeight, progressPixels, progressBarHeight  + 1, Shared.AltTextColor);
+
+        // Draw timer
+        Color timerColor = Shared.TextColor;
+        if (timerRunning)
+        {
+            timerColor = Shared.AltTextColor;
+        }
+        string timerText = FormatTime(timer);
+        float timerX = (GetScreenWidth() - GetTextWidth(timerText)) / 2;
+        float timerY = (int)(GetScreenHeight() * .35 - secondaryFont.BaseSize * .5f);
+        DrawTextEx(secondaryFont, timerText, new Vector2(timerX, timerY), secondaryFont.BaseSize, 0, timerColor);
+
         ClearBackground(Shared.BackgroundColor);
     }
 
     public void Update() 
     {
+        timeSinceType += GetFrameTime();
+        
         float dy = GetMouseWheelMoveV().Y;
         if (dy != 0)
         {
@@ -76,17 +117,34 @@ public class PracticeScene : Scene
         int key = GetCharPressed();
         while (key > 0)
         {
-            Console.WriteLine($"{key} {(char)key}");
-            if (key == ' ')
+            if (!complete)
             {
-                if (words[wordIndex].InputBuffer.Length > 0)
+                timerRunning = true;
+                timeSinceType = 0;
+
+                if (key == ' ')
                 {
-                    wordIndex = Math.Min(wordIndex + 1, words.Count - 1);
+                    if (words[wordIndex].InputBuffer.Length > 0)
+                    {
+                        if (Shared.UserSettings.SmoothScroll && wordIndex < words.Count - 1)
+                        {
+                            xOffset += GetWordWidth(words[wordIndex], false);
+                        }
+                    
+                        wordIndex = Math.Min(wordIndex + 1, words.Count - 1);
+                    }
                 }
-            }
-            else
-            {
-                words[wordIndex].InputBuffer.Append((char)key);
+                else
+                {
+                    words[wordIndex].InputBuffer.Append((char)key);
+                
+                    // Check if we are done
+                    if (wordIndex == words.Count - 1 && words[wordIndex].InputBuffer.ToString() == words[wordIndex].Text)
+                    {
+                        complete = true;
+                        timerRunning = false;
+                    }
+                }
             }
             key = GetCharPressed();
         }
@@ -94,17 +152,39 @@ public class PracticeScene : Scene
         key = GetKeyPressed();
         while (key > 0)
         {
-            if (key == (int)KeyboardKey.Backspace)
+            if (!complete)
             {
-                Backspace();
+                timeSinceType = 0;
+                if (key == (int)KeyboardKey.Backspace)
+                {
+                    Backspace();
+                }
             }
             key = GetKeyPressed();
         }
 
-        if (IsKeyPressedRepeat(KeyboardKey.Backspace))
+        if (IsKeyPressedRepeat(KeyboardKey.Backspace) && !complete)
         {
+            timeSinceType = 0;
             Backspace();
         }
+
+        xOffset = ExpDecay(xOffset, 0, 20, GetFrameTime());
+
+        if (timeSinceType > StopTimingThreshold)
+        {
+            timerRunning = false;
+        }
+
+        if (timerRunning)
+        {
+            timer += GetFrameTime();
+        }
+    }
+
+    float ExpDecay(float a, float b, float decay, float dt)
+    {
+        return b + (a - b) * MathF.Exp(-decay * dt);
     }
 
     void Backspace()
@@ -113,7 +193,14 @@ public class PracticeScene : Scene
         if (word.InputBuffer.Length == 0)
         {
             // Go to previous word
-            wordIndex = Math.Max(0, wordIndex - 1);
+            if (wordIndex > 0)
+            {
+                wordIndex--;
+                if (Shared.UserSettings.SmoothScroll)
+                {
+                    xOffset -= GetWordWidth(words[wordIndex], false);
+                }
+            }
         }
         else
         {
@@ -211,6 +298,14 @@ public class PracticeScene : Scene
         return totalWidth + GetTextWidth(" ");
     }
     
+    string FormatTime(float time)
+    {
+        int minutes = (int)(time / 60);
+        int seconds = (int)(time % 60);
+
+        return $"{minutes:D1}:{seconds:D2}";
+    }
+
     unsafe int GetTextWidth(string text)
     {
         float width = 0;

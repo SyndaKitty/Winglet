@@ -16,6 +16,9 @@ public static class Window
         {
             SetWindowState(ConfigFlags.ResizableWindow);
         }
+
+        Shared.LoadUserSettings();
+
         if (settings.VSync)
         {
             SetWindowState(ConfigFlags.VSyncHint);

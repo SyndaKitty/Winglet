@@ -22,6 +22,13 @@
 
             Log.Info(Tag, $"Loaded {words.Count} words");
 
+            int hash = 0;
+            foreach (var word in words)
+            {
+                hash = hash ^ word.GetHashCode();
+            }
+            Log.Info(Tag, $"Lesson hash: {hash}");
+
             return new Lesson 
             {
                 Words = words

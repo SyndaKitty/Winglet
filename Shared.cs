@@ -1,4 +1,5 @@
 ﻿using Raylib_cs;
+using System.Runtime.InteropServices;
 
 public static class Shared
 {
@@ -13,8 +14,11 @@ public static class Shared
     public static Color AltErrTextColor = new Color(121, 23, 23);
 
     public static string PrimaryFontFile = "Resources/Hack-Regular.ttf";
+    public static string SecondaryFontFile = "Resources/Roboto-Medium.ttf";
 
     public static Dictionary<(string, int), Font> FontCache = [];
+    
+    public static UserSettings UserSettings = new();
 
     public static Font GetFont(string fontFile, int fontSize)
     {
@@ -30,14 +34,34 @@ public static class Shared
 
     public static string GetAppdataPath()
     {
-        string path = Environment.ExpandEnvironmentVariables("%AppData%/Wingman");
+        const string AppFolder = "Wingman";
 
-        // Fallback if %AppData% is not set
-        if (path.Contains("%AppData%"))
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        }
+            string? path = Environment.GetEnvironmentVariable("AppData");
 
-        return path;
+            // Fallback if %AppData% is not set
+            if (path is null)
+            {
+                path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            }
+
+            return Path.Combine(path, AppFolder);
+        }
+        else
+        {
+            string? path = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
+            if (path is null)
+            {
+                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
+            }
+            
+            return Path.Combine(path, AppFolder);
+        }
+    }
+
+    public static void LoadUserSettings()
+    {
+        var path = GetAppdataPath();
     }
 }
