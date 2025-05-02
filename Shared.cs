@@ -1,5 +1,7 @@
 ﻿using Raylib_cs;
+using System.IO;
 using System.Runtime.InteropServices;
+using Tomlyn;
 
 public static class Shared
 {
@@ -19,6 +21,8 @@ public static class Shared
     public static Dictionary<(string, int), Font> FontCache = [];
     
     public static UserSettings UserSettings = new();
+
+    const string Tag = "Shared";
 
     public static Font GetFont(string fontFile, int fontSize)
     {
@@ -62,6 +66,51 @@ public static class Shared
 
     public static void LoadUserSettings()
     {
-        var path = GetAppdataPath();
+        var path = Path.Combine(GetAppdataPath(), "Settings.toml");
+        if (File.Exists(path))
+        {
+            Log.Info(Tag, $"Loading user settings from {path}");
+            try
+            {
+                UserSettings = Toml.ToModel<UserSettings>(File.ReadAllText(path));
+                return;
+            }
+            catch (Exception e)
+            {
+                Log.Error(Tag, $"Failed to load user settings: {e.Message}");
+
+                ArchiveSettingsFile(path);
+            }
+        }
+        
+        Log.Info(Tag, $"Creating new user settings file at {path}");
+        UserSettings = new UserSettings();
+        File.WriteAllText(path, Toml.FromModel(UserSettings));
+    }
+
+    static void ArchiveSettingsFile(string path)
+    {
+        string newPath;
+        int version = 0;
+        while (true)
+        {
+            if (version > 0)
+            {
+                newPath = path + $"_{version}.old";
+            }
+            else
+            {
+                newPath = path + ".old";
+            }
+
+            if (!File.Exists(newPath))
+            {
+                break;
+            }
+            version++;
+        }
+        
+        Log.Info(Tag, $"Archiving old settings file to {newPath}");
+        File.Move(path, newPath, true);
     }
 }
