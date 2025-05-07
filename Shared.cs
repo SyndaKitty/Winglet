@@ -16,7 +16,7 @@ public static class Shared
     public static Color AltErrTextColor = new Color(121, 23, 23);
 
     public static string PrimaryFontFile = "Resources/Hack-Regular.ttf";
-    public static string SecondaryFontFile = "Resources/Roboto-Medium.ttf";
+    public static string SecondaryFontFile = "Resources/Hack-Regular.ttf";
 
     public static Dictionary<(string, int), Font> FontCache = [];
     
@@ -36,13 +36,13 @@ public static class Shared
         return font;
     }
 
-    public static string GetAppdataPath()
+    public static string GetApplicationPath()
     {
         const string AppFolder = "Wingman";
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            string? path = Environment.GetEnvironmentVariable("AppData");
+            string? path = Environment.GetEnvironmentVariable("APPDATA");
 
             // Fallback if %AppData% is not set
             if (path is null)
@@ -64,9 +64,38 @@ public static class Shared
         }
     }
 
+    public static string? GetPloverPath()
+    {
+        var local = GetLocalAppdataPath();
+        if (local is null) return null;
+        return Path.Combine(local, "plover/plover");
+    }
+
+    public static string? GetLocalAppdataPath()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            string? path = Environment.GetEnvironmentVariable("LOCALAPPDATA");
+
+            // Fallback if %AppData% is not set
+            if (path is null)
+            {
+                path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            }
+
+            return path;
+        }
+        else
+        {
+            // TODO: Can be anywhere :loldunno:
+            Log.Error(Tag, "Getting local appdata path is not implemented on *nix systems");
+            return null;
+        }
+    }
+
     public static void LoadUserSettings()
     {
-        var path = Path.Combine(GetAppdataPath(), "Settings.toml");
+        var path = Path.Combine(GetApplicationPath(), "Settings.toml");
         if (File.Exists(path))
         {
             Log.Info(Tag, $"Loading user settings from {path}");
@@ -91,8 +120,7 @@ public static class Shared
     static void ArchiveSettingsFile(string path)
     {
         string newPath;
-        int version = 0;
-        while (true)
+        for (int version = 0; ; version++)
         {
             if (version > 0)
             {
@@ -103,11 +131,7 @@ public static class Shared
                 newPath = path + ".old";
             }
 
-            if (!File.Exists(newPath))
-            {
-                break;
-            }
-            version++;
+            if (!File.Exists(newPath)) break;
         }
         
         Log.Info(Tag, $"Archiving old settings file to {newPath}");

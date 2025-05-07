@@ -19,14 +19,24 @@ public static class Log
     static bool isLogging;
     static List<string> whitelistTags = new();
     static List<string> blacklistTags = new();
-    static Severity Severity = Severity.All;
+    static Severity Severity = Severity.Info;
+
+    static List<string> SeverityTag = [
+        "[All  ]",
+        "[Trace]",
+        "[Info ]",
+        "[Warn ]",
+        "[Error]",
+        "[Fatal]",
+        "[None ]"
+    ];
 
     static Log()
     {
         string currentTime = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         string fileName = $"log_{currentTime}.txt";
 
-        string appData = Shared.GetAppdataPath();
+        string appData = Shared.GetApplicationPath();
         Directory.CreateDirectory(appData);
 
         string logFileDir = Path.Combine(appData, "Logs");
@@ -91,7 +101,7 @@ public static class Log
     static void EnqueueLog(Severity severity, string tag, string message, bool ignoreFilter)
     {
         string currentTime = DateTime.Now.ToString("HH:mm:ss.fff");
-        string logMessage = $"[{currentTime}] [{severity}] [{tag}] {message}";
+        string logMessage = $"[{currentTime}] {SeverityTag[(int)severity]} [{tag}] {message}";
 
         var info = new LogMessageInfo {
             Message = logMessage,

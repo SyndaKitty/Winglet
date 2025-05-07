@@ -95,7 +95,7 @@ public class PracticeScene : Scene
         }
         string timerText = FormatTime(timer);
         float timerX = (GetScreenWidth() - GetTextWidth(timerText)) / 2;
-        float timerY = (int)(GetScreenHeight() * .35 - secondaryFont.BaseSize * .5f);
+        float timerY = (int)(GetScreenHeight() * .5 - primaryFont.BaseSize * 3f);
         DrawTextEx(secondaryFont, timerText, new Vector2(timerX, timerY), secondaryFont.BaseSize, 0, timerColor);
 
         ClearBackground(Shared.BackgroundColor);
@@ -109,9 +109,10 @@ public class PracticeScene : Scene
         if (dy != 0)
         {
             int newFontSize = primaryFont.BaseSize + (int)dy;
-            newFontSize = Math.Clamp(newFontSize, 10, 200);
+            newFontSize = Math.Clamp(newFontSize, 20, 120);
 
             primaryFont = Shared.GetFont(Shared.PrimaryFontFile, newFontSize);
+            secondaryFont = Shared.GetFont(Shared.SecondaryFontFile, newFontSize);
         }
 
         int key = GetCharPressed();
