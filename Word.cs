@@ -5,6 +5,7 @@ public class Word
     public string Text;
     public string? InputExplanation;
     public StringBuilder InputBuffer;
+    public bool Counted;
 
     public Word(string text, string? input)
     {

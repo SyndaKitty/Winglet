@@ -13,6 +13,7 @@ public class PracticeScene : Scene
     List<Word> words;
     PloverServer server;
     Input input;
+    WPM wpm;
 
     bool complete = false;
     float timeSinceComplete = 0f;
@@ -24,8 +25,8 @@ public class PracticeScene : Scene
     bool timerRunning = false;
     float timer = 0;
     float timeSinceType = 0;
+    
     const float StopTimingThreshold = 5f;
-
 
     public PracticeScene(string lessonFilepath)
     {
@@ -33,6 +34,7 @@ public class PracticeScene : Scene
         words = new();
         server = new();
         input = new(server);
+        wpm = new();
 
         input.OnBackspace += Backspace;
         input.OnTextTyped += TextTyped;
@@ -57,6 +59,8 @@ public class PracticeScene : Scene
     
     public void Draw() 
     {
+        ClearBackground(Shared.BackgroundColor);
+
         Vector2 origin = new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2 - primaryFont.BaseSize);
         Vector2 cursor = origin;
         cursor.X += xOffset;
@@ -98,18 +102,25 @@ public class PracticeScene : Scene
         int progressPixels = (int)(GetScreenWidth() * smoothProgressPercent);
         DrawRectangle(0, GetScreenHeight() - progressBarHeight, progressPixels, progressBarHeight  + 1, Shared.AltTextColor);
 
-        // Draw timer
         Color timerColor = Shared.TextColor;
         if (timerRunning)
         {
             timerColor = Shared.AltTextColor;
         }
-        string timerText = FormatTime(timer);
-        float timerX = (GetScreenWidth() - Shared.GetTextWidth(timerText, primaryFont)) / 2;
-        float timerY = (int)(GetScreenHeight() * .5 - primaryFont.BaseSize * 3f);
-        DrawTextEx(secondaryFont, timerText, new Vector2(timerX, timerY), secondaryFont.BaseSize, 0, timerColor);
 
-        ClearBackground(Shared.BackgroundColor);
+        const float padding = 10f;
+        float y = GetScreenHeight() - primaryFont.BaseSize - padding * 3;
+        
+        // Draw WPM
+        float wpmX = padding;
+        float wpmY = y;
+        DrawText(primaryFont, FormatWpm(wpm.GetWPM()), new Vector2(wpmX, wpmY), timerColor);
+
+        // Draw timer
+        string timerText = FormatTime(timer);
+        float timerX = padding;
+        y -= primaryFont.BaseSize + padding;
+        DrawText(primaryFont, timerText, new Vector2(timerX, y), timerColor);
     }
 
     void TextTyped(string text)
@@ -121,28 +132,44 @@ public class PracticeScene : Scene
 
         foreach (var key in text)
         {
-            if (key == ' ')
+            KeyTyped(key);
+        }
+    }
+
+    void KeyTyped(char key)
+    {
+        Word word = words[wordIndex];
+
+        if (key == ' ')
+        {
+            if (word.InputBuffer.Length > 0)
             {
-                if (words[wordIndex].InputBuffer.Length > 0)
+                if (!word.Counted)
                 {
-                    if (Shared.UserSettings.SmoothScroll && wordIndex < words.Count - 1)
+                    if (word.InputBuffer.ToString() == word.Text)
                     {
-                        xOffset += GetWordWidth(words[wordIndex], false);
+                        word.Counted = true;
+                        wpm.WordTyped();
                     }
-
-                    wordIndex = Math.Min(wordIndex + 1, words.Count - 1);
                 }
-            }
-            else
-            {
-                words[wordIndex].InputBuffer.Append(key);
 
-                // Check if we are done
-                if (wordIndex == words.Count - 1 && words[wordIndex].InputBuffer.ToString() == words[wordIndex].Text)
+                if (Shared.UserSettings.SmoothScroll && wordIndex < words.Count - 1)
                 {
-                    complete = true;
-                    timerRunning = false;
+                    xOffset += GetWordWidth(words[wordIndex], false);
                 }
+
+                wordIndex = Math.Min(wordIndex + 1, words.Count - 1);
+            }
+        }
+        else
+        {
+            words[wordIndex].InputBuffer.Append(key);
+
+            // Check if we are done
+            if (wordIndex == words.Count - 1 && words[wordIndex].InputBuffer.ToString() == words[wordIndex].Text)
+            {
+                complete = true;
+                timerRunning = false;
             }
         }
     }
@@ -202,12 +229,18 @@ public class PracticeScene : Scene
         if (timerRunning)
         {
             timer += GetFrameTime();
+            wpm.Update();
         }
     }
 
     float ExpDecay(float a, float b, float decay, float dt)
     {
         return b + (a - b) * MathF.Exp(-decay * dt);
+    }
+
+    void DrawText(Font font, string text, Vector2 pos, Color color)
+    {
+        DrawTextEx(font, text, pos, font.BaseSize, 0, color);
     }
 
     /// <summary>
@@ -235,7 +268,7 @@ public class PracticeScene : Scene
 
     void DrawInputBuffer(Word word, Vector2 pos)
     {
-        DrawTextEx(primaryFont, word.InputBuffer.ToString(), pos, primaryFont.BaseSize, 0, Shared.AltTextColor);
+        DrawText(primaryFont, word.InputBuffer.ToString(), pos, Shared.AltTextColor);
     }
 
     int DrawWord(Word word, Vector2 pos, bool visited)
@@ -278,7 +311,7 @@ public class PracticeScene : Scene
                 str = buffer[i].ToString();
                 color = Shared.AltTextColor;
             }
-            DrawTextEx(primaryFont, str, pos, fontSize, 0, color);
+            DrawText(primaryFont, str, pos, color);
 
             int width = Shared.GetTextWidth(str, primaryFont);
             pos.X += width;
@@ -304,6 +337,11 @@ public class PracticeScene : Scene
         int minutes = (int)(time / 60);
         int seconds = (int)(time % 60);
 
-        return $"{minutes:D1}:{seconds:D2}";
+        return $"{minutes,3:D1}:{seconds:D2}";
+    }
+
+    string FormatWpm(int wpm)
+    {
+        return $"{wpm,3} WPM";
     }
 }

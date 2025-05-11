@@ -19,7 +19,7 @@ public static class Log
     static bool isLogging;
     static List<string> whitelistTags = new();
     static List<string> blacklistTags = new();
-    static Severity Severity = Severity.Info;
+    static Severity Severity = Severity.All;
 
     static List<string> SeverityTag = [
         "[All  ]",
