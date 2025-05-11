@@ -4,6 +4,11 @@ using System.Net.WebSockets;
 using System.Security.Cryptography;
 using System.Text;
 
+/// <summary>
+/// Responsible for raw connection to the Plover server.
+/// Does not deal with Plover logic, but rather getting the raw data.
+/// Assign callback to receive data
+/// </summary>
 public class PloverConnection
 {
     const string Tag = "PloverConnection";
@@ -12,9 +17,12 @@ public class PloverConnection
     RandomNumberGenerator rnd;
     byte[] privateKey;
     byte[] publicKey;
-    
+
     Curve25519XSalsa20Poly1305? mailbox;
     ClientWebSocket? webSocket;
+
+    public delegate void MessageReceivedHandler(string message);
+    public event MessageReceivedHandler? OnMessage;
 
     public string ServerHost
     {
@@ -27,7 +35,7 @@ public class PloverConnection
         set { serverConfig.port = value; }
     }
 
-    public string ServerPublicKey {         
+    public string ServerPublicKey {
         get { return serverConfig.public_key; }
         set { serverConfig.public_key = value; }
     }
@@ -51,7 +59,7 @@ public class PloverConnection
             Log.Error(Tag, "Plover server config is not set");
             return false;
         }
-        
+
         mailbox = new Curve25519XSalsa20Poly1305(privateKey, Convert.FromHexString(ServerPublicKey));
         webSocket = new();
         webSocket.Options.SetRequestHeader("Origin", ServerHost);
@@ -66,20 +74,29 @@ public class PloverConnection
             await webSocket.ConnectAsync(url, CancellationToken.None);
             Log.Info(Tag, "Connected successfully");
 
-            await ReceiveLoop(webSocket);
-
             return true;
         }
         catch (Exception ex)
         {
-            Log.Error("Error when connecting to plover server", ex.ToString());
+            Log.Error(Tag, $"Error when connecting to plover server: {ex.ToString()}");
             return false;
         }
     }
 
-    async Task ReceiveLoop(ClientWebSocket webSocket)
+    public void BeginReading()
+    {
+        Task.Run(ReadLoop);
+    }
+
+    async Task ReadLoop()
     {
         byte[] buffer = new byte[2048];
+
+        if (webSocket is null)
+        {
+            Log.Error(Tag, "No active connection to Plover server.");
+            return;
+        }
 
         while (webSocket.State == WebSocketState.Open)
         {
@@ -100,28 +117,33 @@ public class PloverConnection
             var serverNonce = actualBytes.Take(Curve25519XSalsa20Poly1305.NonceLength).ToArray();
             var encryptedMessage = actualBytes.Skip(Curve25519XSalsa20Poly1305.NonceLength).ToArray();
 
-            Log.Trace(Tag, "Incoming Nonce: " + Convert.ToBase64String(serverNonce));
-            Log.Trace(Tag, "Incoming Cipher: " + Convert.ToBase64String(encryptedMessage));
-
             byte[] decipheredMessage = new byte[encryptedMessage.Length - Curve25519XSalsa20Poly1305.TagLength];
             if (mailbox!.TryDecrypt(decipheredMessage, encryptedMessage, serverNonce))
             {
-                Log.Info(Tag, $"Plover: {Encoding.UTF8.GetString(decipheredMessage)}");
+                string message = Encoding.UTF8.GetString(decipheredMessage);
+                
+                Log.Info(Tag, $"Plover: {message}");
+                OnMessage?.Invoke(message);
             }
             else
             {
                 Log.Error(Tag, "Failed to decrypt message");
             }
         }
+    }
 
-        Console.WriteLine(webSocket.State);
+    async Task SendMessage(ClientWebSocket webSocket, string message)
+    {
+        var encryptedMessage = EncryptAndPackMessage(message);
+        var bytes = Encoding.UTF8.GetBytes(encryptedMessage);
+        await webSocket.SendAsync(bytes, WebSocketMessageType.Text, true, new());
     }
 
     string EncryptAndPackMessage(string message)
     {
         byte[] cipher = new byte[message.Length + Curve25519XSalsa20Poly1305.TagLength];
         
-        byte[] nonce = new byte[Curve25519XSalsa20Poly1305.NonceLength];
+        var nonce = new byte[Curve25519XSalsa20Poly1305.NonceLength];
         rnd.GetBytes(nonce);
 
         mailbox!.Encrypt(cipher, Encoding.UTF8.GetBytes(message), nonce);

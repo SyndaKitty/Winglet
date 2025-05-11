@@ -1,5 +1,4 @@
 ﻿using Raylib_cs;
-using System.IO;
 using System.Runtime.InteropServices;
 using Tomlyn;
 
@@ -136,5 +135,28 @@ public static class Shared
         
         Log.Info(Tag, $"Archiving old settings file to {newPath}");
         File.Move(path, newPath, true);
+    }
+
+    public static unsafe int GetTextWidth(string text, Font font)
+    {
+        float width = 0;
+
+        for (int i = 0; i < text.Length; i++)
+        {
+            int codepointByteCount = 0;
+            int codepoint = Raylib.GetCodepoint(text[i].ToString(), ref codepointByteCount);
+            int index = Raylib.GetGlyphIndex(font, codepoint);
+
+            if (font.Glyphs[index].AdvanceX == 0)
+            {
+                width += font.Recs[index].Width;
+            }
+            else
+            {
+                width += font.Glyphs[index].AdvanceX;
+            }
+        }
+
+        return (int)width;
     }
 }
