@@ -1,4 +1,6 @@
-﻿using Raylib_cs;
+﻿using ImGuiNET;
+using Raylib_cs;
+using rlImGui_cs;
 using System.Numerics;
 using System.Text;
 using static Raylib_cs.Raylib;
@@ -48,7 +50,6 @@ public class PracticeScene : Scene
         server.OnSendStroke += Stroke;
 
         SetFontSize(60);
-
     }
 
     public void Load() 
@@ -61,7 +62,18 @@ public class PracticeScene : Scene
         }
         words = lesson.Words ?? [];
 
-        server.Connect().GetAwaiter().GetResult();
+        try
+        {
+            bool connected = server.Connect().GetAwaiter().GetResult();
+            if (!connected)
+            {
+                input.SetInputMode(Input.Mode.Keyboard);
+            }
+        }
+        catch
+        {
+
+        }
 
         input.SetInputMode(Input.Mode.Plover);
     }
@@ -73,6 +85,15 @@ public class PracticeScene : Scene
         const float padding = 10f;
 
         ClearBackground(Shared.BackgroundColor);
+
+        ImGui.ShowDemoWindow();
+
+        if (ImGui.Begin("Simple Window"))
+        {
+            ImGui.TextUnformatted("Test " + IconFonts.FontAwesome6.BookAtlas);
+        }
+
+        ImGui.End();
 
         Vector2 origin = new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2 - primaryFont.BaseSize);
         Vector2 cursor = origin;

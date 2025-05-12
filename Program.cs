@@ -20,3 +20,4 @@ Raylib.ClearBackground(Shared.BackgroundColor);
 Raylib.EndDrawing();
 
 Window.Run(new PracticeScene("Resources/Lessons/lesson01.txt"));
+Environment.Exit(0);
