@@ -18,7 +18,7 @@ public class WPM
         timesSinceWordFinished = [];
     }
 
-    public void WordTyped()
+    public void WordTyped(Word word)
     {
         timesSinceWordFinished.Add(0);
     }
@@ -74,8 +74,7 @@ public class WPM
         }
         else
         {
-            Console.WriteLine(timesSinceWordFinished[wordConsideredIndex] + " " + wordsConsidered);
-            wpmWithinConsidered = (float)wordsConsidered / timesSinceWordFinished[wordConsideredIndex] * 60f;
+            wpmWithinConsidered = wordsConsidered / timesSinceWordFinished[wordConsideredIndex] * 60f;
         }
 
         // If the first {DefragListCount} elements are all stale, remove them

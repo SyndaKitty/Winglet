@@ -7,13 +7,18 @@ public class PracticeScene : Scene
 {
     const string Tag = "PracticeScene";
 
-    Font primaryFont = Shared.GetFont(Shared.PrimaryFontFile, 80);
-    Font secondaryFont = Shared.GetFont(Shared.SecondaryFontFile, 80);
+    Font primaryFont;
+    Font secondaryFont;
+    Font smallFont;
+    int primaryCharWidth = 0;
+    int smallCharWidth = 0;
+    
     string lessonPath;
     List<Word> words;
     PloverServer server;
     Input input;
     WPM wpm;
+    List<string> paper;
 
     bool complete = false;
     float timeSinceComplete = 0f;
@@ -35,9 +40,15 @@ public class PracticeScene : Scene
         server = new();
         input = new(server);
         wpm = new();
+        paper = new();
 
         input.OnBackspace += Backspace;
         input.OnTextTyped += TextTyped;
+
+        server.OnSendStroke += Stroke;
+
+        SetFontSize(60);
+
     }
 
     public void Load() 
@@ -59,11 +70,15 @@ public class PracticeScene : Scene
     
     public void Draw() 
     {
+        const float padding = 10f;
+
         ClearBackground(Shared.BackgroundColor);
 
         Vector2 origin = new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2 - primaryFont.BaseSize);
         Vector2 cursor = origin;
         cursor.X += xOffset;
+
+        int width = 0;
 
         // Draw cursor
         Word word = words[wordIndex];
@@ -73,7 +88,7 @@ public class PracticeScene : Scene
         for (int i = wordIndex; i < words.Count; i++)
         {
             word = words[i];
-            int width = DrawWord(word, cursor, false);
+            width = DrawWord(word, cursor, false);
             cursor.X += width;
 
             if (cursor.X > GetScreenWidth()) break;
@@ -90,6 +105,38 @@ public class PracticeScene : Scene
             if (cursor.X < 0) break;
         }
 
+        // Draw paper
+        const int PaperChars = 23;
+        const int PaperLines = 8;
+        cursor.X = GetScreenWidth() - PaperChars * smallCharWidth;
+        cursor.Y = (PaperLines - 1) * smallFont.BaseSize;
+        for (int i = paper.Count - 1; i >= 0; i--)
+        {
+            Util.DrawText(smallFont, paper[i], cursor, Shared.AltTextColor);
+            cursor.Y -= smallFont.BaseSize;
+        }
+
+        // Draw left panel
+        width = primaryCharWidth * 8 + (int)padding * 2;
+        DrawRectangle(0, 0, width, GetScreenHeight() + 1, Shared.PanelColor);
+
+        Color timerColor = Shared.TextColor;
+        if (timerRunning)
+        {
+            timerColor = Shared.AltTextColor;
+        }
+        
+        // Draw WPM
+        cursor.X = padding;
+        cursor.Y = GetScreenHeight() - primaryFont.BaseSize - padding * 3;
+        Util.DrawText(primaryFont, FormatWpm(wpm.GetWPM()), cursor, timerColor);
+
+        // Draw timer
+        string timerText = FormatTime(timer);
+        cursor.X = padding;
+        cursor.Y -= primaryFont.BaseSize + padding;
+        Util.DrawText(primaryFont, timerText, cursor, timerColor);
+        
         // Draw progress bar
         const int progressBarHeight = 20;
         float progressPercent = (float)wordIndex / words.Count;
@@ -98,29 +145,49 @@ public class PracticeScene : Scene
             // If we are done, set progress to 100%
             progressPercent = 1;
         }
-        smoothProgressPercent = ExpDecay(smoothProgressPercent, progressPercent, 15, GetFrameTime());
+        smoothProgressPercent = Util.ExpDecay(smoothProgressPercent, progressPercent, 15, GetFrameTime());
         int progressPixels = (int)(GetScreenWidth() * smoothProgressPercent);
         DrawRectangle(0, GetScreenHeight() - progressBarHeight, progressPixels, progressBarHeight  + 1, Shared.AltTextColor);
+    }
 
-        Color timerColor = Shared.TextColor;
-        if (timerRunning)
+    public void Update() 
+    {
+        input.Update();
+
+        timeSinceType += GetFrameTime();
+        
+        float dy = GetMouseWheelMoveV().Y;
+        if (dy != 0)
         {
-            timerColor = Shared.AltTextColor;
+            int newFontSize = primaryFont.BaseSize + (int)dy;
+            newFontSize = Math.Clamp(newFontSize, 20, 80);
+
+            SetFontSize(newFontSize);
         }
 
-        const float padding = 10f;
-        float y = GetScreenHeight() - primaryFont.BaseSize - padding * 3;
-        
-        // Draw WPM
-        float wpmX = padding;
-        float wpmY = y;
-        DrawText(primaryFont, FormatWpm(wpm.GetWPM()), new Vector2(wpmX, wpmY), timerColor);
+        xOffset = Util.ExpDecay(xOffset, 0, 20, GetFrameTime());
 
-        // Draw timer
-        string timerText = FormatTime(timer);
-        float timerX = padding;
-        y -= primaryFont.BaseSize + padding;
-        DrawText(primaryFont, timerText, new Vector2(timerX, y), timerColor);
+        if (timeSinceType > StopTimingThreshold)
+        {
+            timerRunning = false;
+        }
+
+        if (timerRunning)
+        {
+            timer += GetFrameTime();
+            wpm.Update();
+        }
+    }
+
+    void SetFontSize(int fontSize)
+    {
+        primaryFont = Shared.GetFont(Shared.PrimaryFontFile, fontSize);
+        secondaryFont = Shared.GetFont(Shared.SecondaryFontFile, fontSize);
+        smallFont = Shared.GetFont(Shared.PrimaryFontFile, (int)(fontSize * .6f));
+
+        // Assuming mono-spaced font, so character width will be consistent
+        primaryCharWidth = Util.GetTextWidth(" ", primaryFont);
+        smallCharWidth = Util.GetTextWidth(" ", smallFont);
     }
 
     void TextTyped(string text)
@@ -149,7 +216,7 @@ public class PracticeScene : Scene
                     if (word.InputBuffer.ToString() == word.Text)
                     {
                         word.Counted = true;
-                        wpm.WordTyped();
+                        wpm.WordTyped(word);
                     }
                 }
 
@@ -202,45 +269,10 @@ public class PracticeScene : Scene
             }
         }
     }
-
-    public void Update() 
+    
+    void Stroke(PloverStroke stroke)
     {
-        input.Update();
-
-        timeSinceType += GetFrameTime();
-        
-        float dy = GetMouseWheelMoveV().Y;
-        if (dy != 0)
-        {
-            int newFontSize = primaryFont.BaseSize + (int)dy;
-            newFontSize = Math.Clamp(newFontSize, 20, 120);
-
-            primaryFont = Shared.GetFont(Shared.PrimaryFontFile, newFontSize);
-            secondaryFont = Shared.GetFont(Shared.SecondaryFontFile, newFontSize);
-        }
-
-        xOffset = ExpDecay(xOffset, 0, 20, GetFrameTime());
-
-        if (timeSinceType > StopTimingThreshold)
-        {
-            timerRunning = false;
-        }
-
-        if (timerRunning)
-        {
-            timer += GetFrameTime();
-            wpm.Update();
-        }
-    }
-
-    float ExpDecay(float a, float b, float decay, float dt)
-    {
-        return b + (a - b) * MathF.Exp(-decay * dt);
-    }
-
-    void DrawText(Font font, string text, Vector2 pos, Color color)
-    {
-        DrawTextEx(font, text, pos, font.BaseSize, 0, color);
+        paper.Add(stroke.Paper);
     }
 
     /// <summary>
@@ -261,14 +293,9 @@ public class PracticeScene : Scene
 
         if (truncate)
         {
-            return Shared.GetTextWidth(text.Substring(0, word.InputBuffer.Length), primaryFont);
+            return Util.GetTextWidth(text.Substring(0, word.InputBuffer.Length), primaryFont);
         }
-        return Shared.GetTextWidth(text + " ", primaryFont);
-    }
-
-    void DrawInputBuffer(Word word, Vector2 pos)
-    {
-        DrawText(primaryFont, word.InputBuffer.ToString(), pos, Shared.AltTextColor);
+        return Util.GetTextWidth(text + " ", primaryFont);
     }
 
     int DrawWord(Word word, Vector2 pos, bool visited)
@@ -311,9 +338,9 @@ public class PracticeScene : Scene
                 str = buffer[i].ToString();
                 color = Shared.AltTextColor;
             }
-            DrawText(primaryFont, str, pos, color);
+            Util.DrawText(primaryFont, str, pos, color);
 
-            int width = Shared.GetTextWidth(str, primaryFont);
+            int width = Util.GetTextWidth(str, primaryFont);
             pos.X += width;
             totalWidth += width;
         }
@@ -329,7 +356,13 @@ public class PracticeScene : Scene
             DrawRectangle((int)pos.X, (int)pos.Y, totalWidth, height, Shared.ErrTextColor);
         }
 
-        return totalWidth + Shared.GetTextWidth(" ", primaryFont);
+        return totalWidth + Util.GetTextWidth(" ", primaryFont);
+    }
+    
+    void DrawInputBuffer(Word word, Vector2 pos)
+    {
+        string inputBuffer = Util.RemoveControlCharacters(word.InputBuffer.ToString());
+        Util.DrawText(primaryFont, inputBuffer, pos, Shared.AltTextColor);
     }
     
     string FormatTime(float time)
@@ -342,6 +375,10 @@ public class PracticeScene : Scene
 
     string FormatWpm(int wpm)
     {
+        if (wpm > 999)
+        {
+            wpm = 999;
+        }
         return $"{wpm,3} WPM";
     }
 }
