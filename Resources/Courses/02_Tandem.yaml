@@ -1,0 +1,8 @@
+﻿Name: Words
+Description: Simple words
+Lessons:
+  - Name: "asd"
+    Type: words
+    Order: random
+    Prompts: "bop pop top lop sop  rap tap sap lap"
+  

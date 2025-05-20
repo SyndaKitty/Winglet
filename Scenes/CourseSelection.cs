@@ -9,7 +9,7 @@ public class CourseSelection : Scene
 
     Font primaryFont;
     List<Course> courses = [];
-    int selectedIndex = 0;
+    int selectedIndex = 2;
 
     Color standardColor = Shared.TextColor;
     Color selectedColor = Shared.AltTextColor;

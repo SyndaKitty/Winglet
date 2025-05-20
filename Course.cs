@@ -35,6 +35,10 @@ public class CourseLesson
         foreach (var line in rawLines)
         {
             var words = line.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(x => new Word(x)).ToList();
+            if (Order == LessonOrder.Random)
+            {
+                words = words.OrderBy(x => Guid.NewGuid()).ToList();
+            }
             outputLines.Add(words);
         }
 

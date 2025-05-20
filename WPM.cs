@@ -88,7 +88,7 @@ public class WPM
             timesSinceWordFinished = timesSinceWordFinished.Skip(firstValidIndex).ToList();
         }
 
-        float totalWPM = wordTypedCount / timeElapsed;
+        float totalWPM = wordTypedCount * 60f / timeElapsed;
 
         int wpm = (int)MathF.Round((wpmWithinConsidered + wpmWithinObservation + totalWPM) / 3f);
 

@@ -302,12 +302,13 @@ public class PracticeScene : Scene
 
     void AdvanceLine()
     {
+        lineIndex++;
         if (lineIndex >= lines.Count)
         {
             complete = true;
+            timerRunning = false;
             return;
         }
-        lineIndex++;
         wordIndex = 0;
 
         yOffset += lineGap;
@@ -317,6 +318,9 @@ public class PracticeScene : Scene
     {
         if (complete) return;
         if (lesson.Type != LessonType.Words) return;
+
+        // Stupid hack for skipping space on first word
+        if (wordIndex == 0 && lines[lineIndex][wordIndex].InputBuffer.Length > 0) count--;
         
         for (int i = 0; i < count; i++)
         {
