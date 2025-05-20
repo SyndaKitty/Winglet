@@ -1,0 +1,20 @@
+﻿Name: Introduction
+Description: Learn the keys something something..
+Lessons:
+  - Name: "Left hand top row"
+    Type: raw
+    Order: ordered
+    Prompts: "S T P H S T P H  H P T S H P T S  S S S S  H H H H  P P P P  T T T T  T H S P S P T H  S H T T H S P H  S T P P T P T T  P H S H S H S S  S S S P H P S P  H P T P T H P P  H H P H H S T T  S H S S S P P P  T H T T T T H T"
+  - Name: "Left hand bottom row"  
+    Type: raw
+    Order: ordered
+    Prompts: "S K W R S K W R  R W K S R W K S  K K K K  W W W W  R R R R  S S S S  K W R W R W W R  R S W R R K K S  K W R W S S K S  S W K K S W K W  R R R S S S S K  R K W W K R K K  R S K S W S K R  S S K W K W S W  R R K S K K R R" 
+  - Name: "Right hand top row"
+    Type: raw
+    Order: ordered
+    Prompts: "-F -P -L -T -F -P -L -T  -T -L -P -F -T -L -P -F  -P -P -P  -F -F -F  -T -T -T  -L -L -L  -F -T -T -P -T -T -L -T  -T -T -P -P -T -F -P -L  -P -T -P -T -F -P -T -T  -P -L -T -T -F -P -F -T  -P -F -T -P -F -P -L -L  -L -L -L -T -L -P -P -P  -L -T -F -T -L -T -F -L  -P -T -T -F -T -F -F -P  -P -L -F -T -P -T -T -F"
+  - Name: "Right hand bottom row"
+    Type: raw
+    Order: ordered
+    Prompts: "-S -G -B -R -S -G -B -R  -R -B -G -S -R -B -G -S  -B -B -B  -S -S -S  -G -G -G  -R -R -R  -R -B -G -S -B -R -B -R  -S -G -B -R -B -S -G -B  -R -G -B -B -G -G -S -S  -S -B -S -B -R -R -B -S  -S -R -R -B -S -S -S -B  -G -G -G -S -R -R -S -R  -S -S -B -G -R -R -R -R  -R -R -G -S -G -G -B -S  -S -B -S -S -R -R -G -S"
+  

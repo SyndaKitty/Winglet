@@ -12,6 +12,8 @@ public class WPM
     
     float timeSinceLastCalculation = 0f;
     int lastWPM = 0;
+    int wordTypedCount = 0;
+    float timeElapsed = 0;
 
     public WPM()
     {
@@ -21,6 +23,7 @@ public class WPM
     public void WordTyped(Word word)
     {
         timesSinceWordFinished.Add(0);
+        wordTypedCount += 1;
     }
 
     public void Update()
@@ -30,6 +33,7 @@ public class WPM
             timesSinceWordFinished[i] += Raylib.GetFrameTime();
         }
         timeSinceLastCalculation += Raylib.GetFrameTime();
+        timeElapsed += Raylib.GetFrameTime();
     }
 
     public int GetWPM()
@@ -46,6 +50,7 @@ public class WPM
     // Calculates WPM by taking the average of:
     //  average time to type last {NumWordsConsidered} words
     //  number of words typed in the last {ObservationInterval} seconds
+    //  total WPM since lesson start
     int CalculateWPM()
     {
         float count = 0;
@@ -83,7 +88,9 @@ public class WPM
             timesSinceWordFinished = timesSinceWordFinished.Skip(firstValidIndex).ToList();
         }
 
-        int wpm = (int)MathF.Round((wpmWithinConsidered + wpmWithinObservation) * 0.5f);
+        float totalWPM = wordTypedCount / timeElapsed;
+
+        int wpm = (int)MathF.Round((wpmWithinConsidered + wpmWithinObservation + totalWPM) / 3f);
 
         Log.Trace(Tag, $"Calculated WPM={wpm} | {wpmWithinObservation} {wpmWithinConsidered}");
         return wpm;

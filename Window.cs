@@ -36,7 +36,6 @@ public static class Window
             {
                 ptr.NativePtr->FontDefault = fontPtr;
             }
-
         };
 
         rlImGui.Setup(true);

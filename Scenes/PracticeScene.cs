@@ -1,8 +1,9 @@
 ﻿using ImGuiNET;
 using Raylib_cs;
-using rlImGui_cs;
+using System.Linq;
 using System.Numerics;
 using System.Text;
+using YamlDotNet.Core;
 using static Raylib_cs.Raylib;
 
 public class PracticeScene : Scene
@@ -14,35 +15,46 @@ public class PracticeScene : Scene
     Font smallFont;
     int primaryCharWidth = 0;
     int smallCharWidth = 0;
-    
-    string lessonPath;
-    List<Word> words;
+
+    CourseLesson lesson;
+    List<List<Word>> lines;
     PloverServer server;
     Input input;
     WPM wpm;
     List<string> paper;
+    Stack<string> rawInputBuffer;
 
     bool complete = false;
     float timeSinceComplete = 0f;
 
+    int lineIndex = 0;
     int wordIndex = 0;
-    float xOffset = 0; // Used for horizontal smooth scrolling
+
+    // Used for smooth scrolling
+    List<float> xOffset;
+    float yOffset;
+    
     float smoothProgressPercent = 0;
+    int totalWordCount = 0;
 
     bool timerRunning = false;
     float timer = 0;
     float timeSinceType = 0;
-    
+
     const float StopTimingThreshold = 5f;
 
-    public PracticeScene(string lessonFilepath)
+    int lineGap => primaryFont.BaseSize * 2 + 40;
+
+    public PracticeScene(CourseLesson lesson)
     {
-        lessonPath = lessonFilepath;
-        words = new();
+        this.lesson = lesson;
+        lines = new();
         server = new();
         input = new(server);
         wpm = new();
         paper = new();
+        rawInputBuffer = new();
+        xOffset = [];
 
         input.OnBackspace += Backspace;
         input.OnTextTyped += TextTyped;
@@ -50,17 +62,14 @@ public class PracticeScene : Scene
         server.OnSendStroke += Stroke;
 
         SetFontSize(60);
+
     }
 
     public void Load() 
     {
-        var lesson = Lesson.Load(lessonPath);
-        if (lesson is null)
-        {
-            Log.Error(Tag, "Unable to load lesson scene");
-            throw new ApplicationException($"Unable to load lesson {lessonPath}", null);
-        }
-        words = lesson.Words ?? [];
+        lines = lesson.GetWords() ?? [];
+        totalWordCount = lines.Sum(x => x.Count);
+        xOffset.AddRange(lines.Select(x => 0f));
 
         try
         {
@@ -86,44 +95,12 @@ public class PracticeScene : Scene
 
         ClearBackground(Shared.BackgroundColor);
 
-        ImGui.ShowDemoWindow();
-
-        if (ImGui.Begin("Simple Window"))
-        {
-            ImGui.TextUnformatted("Test " + IconFonts.FontAwesome6.BookAtlas);
-        }
-
-        ImGui.End();
-
         Vector2 origin = new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2 - primaryFont.BaseSize);
         Vector2 cursor = origin;
-        cursor.X += xOffset;
 
-        int width = 0;
-
-        // Draw cursor
-        Word word = words[wordIndex];
-        DrawRectangle((int)cursor.X + GetWordWidth(word, true), (int)cursor.Y, 2, primaryFont.BaseSize, Shared.AccentColor);
-        
-        // Draw words
-        for (int i = wordIndex; i < words.Count; i++)
+        for (int i = 0; i < lines.Count; i++)
         {
-            word = words[i];
-            width = DrawWord(word, cursor, false);
-            cursor.X += width;
-
-            if (cursor.X > GetScreenWidth()) break;
-        }
-
-        cursor = origin;
-        cursor.X += xOffset;
-        for (int i = wordIndex - 1; i >= 0 && i < words.Count; i--)
-        {
-            word = words[i];
-            cursor.X -= GetWordWidth(word);
-            DrawWord(word, cursor, true);
-
-            if (cursor.X < 0) break;
+            DrawWordLine(i, cursor, padding);
         }
 
         // Draw paper
@@ -138,7 +115,7 @@ public class PracticeScene : Scene
         }
 
         // Draw left panel
-        width = primaryCharWidth * 8 + (int)padding * 2;
+        int width = primaryCharWidth * 8 + (int)padding * 2;
         DrawRectangle(0, 0, width, GetScreenHeight() + 1, Shared.PanelColor);
 
         Color timerColor = Shared.TextColor;
@@ -160,13 +137,13 @@ public class PracticeScene : Scene
         
         // Draw progress bar
         const int progressBarHeight = 20;
-        float progressPercent = (float)wordIndex / words.Count;
+        float progressPercent = (lines.Take(lineIndex).Sum(x => x.Count) + wordIndex) / (float)totalWordCount;
         if (complete)
         {
             // If we are done, set progress to 100%
             progressPercent = 1;
         }
-        smoothProgressPercent = Util.ExpDecay(smoothProgressPercent, progressPercent, 15, GetFrameTime());
+        smoothProgressPercent = Util.ExpDecay(smoothProgressPercent, progressPercent, Shared.SlideSpeed, GetFrameTime());
         int progressPixels = (int)(GetScreenWidth() * smoothProgressPercent);
         DrawRectangle(0, GetScreenHeight() - progressBarHeight, progressPixels, progressBarHeight  + 1, Shared.AltTextColor);
     }
@@ -186,7 +163,11 @@ public class PracticeScene : Scene
             SetFontSize(newFontSize);
         }
 
-        xOffset = Util.ExpDecay(xOffset, 0, 20, GetFrameTime());
+        for (int i = 0; i < lines.Count; i++)
+        {
+            xOffset[i] = Util.ExpDecay(xOffset[i], 0, Shared.SlideSpeed, GetFrameTime());
+        }
+        yOffset = Util.ExpDecay(yOffset, 0, Shared.SlideSpeed, GetFrameTime());
 
         if (timeSinceType > StopTimingThreshold)
         {
@@ -197,6 +178,53 @@ public class PracticeScene : Scene
         {
             timer += GetFrameTime();
             wpm.Update();
+        }
+    }
+    
+    void DrawWordLine(int lineIndex, Vector2 cursor, float lineSpacing)
+    {
+        int wordIndex = this.wordIndex;
+        if (this.lineIndex < lineIndex)
+        {
+            wordIndex = 0;
+        }
+        else if (this.lineIndex > lineIndex)
+        {
+            wordIndex = lines[lineIndex].Count - 1;
+        }
+
+        float startX = cursor.X;
+        cursor.Y = GetScreenHeight() / 2 + lineGap * (lineIndex - this.lineIndex);
+        cursor.Y += yOffset;
+        bool activeLine = lineIndex == this.lineIndex;
+
+        if (activeLine)
+        {
+            // Draw cursor
+            int w = Math.Min(wordIndex, lines[lineIndex].Count - 1);
+            Word word = lines[lineIndex][w];
+            DrawRectangle((int)cursor.X + GetWordWidth(word, true), (int)cursor.Y, 2, primaryFont.BaseSize, Shared.AccentColor);
+        }
+
+        // Draw next words
+        cursor.X += xOffset[lineIndex];
+        for (int i = wordIndex; i < lines[lineIndex].Count; i++)
+        {
+            Word word = lines[lineIndex][i];
+            cursor.X += DrawWord(word, cursor, false, activeLine);
+
+            if (cursor.X > GetScreenWidth()) break;
+        }
+
+        // Draw visited words
+        cursor.X = startX + xOffset[lineIndex];
+        for (int i = wordIndex - 1; i >= 0 && i < lines[lineIndex].Count; i--)
+        {
+            Word word = lines[lineIndex][i];
+            cursor.X -= GetWordWidth(word);
+            DrawWord(word, cursor, true, activeLine);
+
+            if (cursor.X < 0) break;
         }
     }
 
@@ -214,6 +242,7 @@ public class PracticeScene : Scene
     void TextTyped(string text)
     {
         if (complete) return;
+        if (lesson.Type != LessonType.Words) return;
 
         timerRunning = true;
         timeSinceType = 0;
@@ -226,7 +255,8 @@ public class PracticeScene : Scene
 
     void KeyTyped(char key)
     {
-        Word word = words[wordIndex];
+        if (complete) return;
+        Word word = lines[lineIndex][wordIndex];
 
         if (key == ' ')
         {
@@ -241,44 +271,59 @@ public class PracticeScene : Scene
                     }
                 }
 
-                if (Shared.UserSettings.SmoothScroll && wordIndex < words.Count - 1)
+                if (Shared.UserSettings.SmoothScroll && wordIndex < lines[lineIndex].Count - 1)
                 {
-                    xOffset += GetWordWidth(words[wordIndex], false);
+                    xOffset[lineIndex] += GetWordWidth(word, false);
                 }
 
-                wordIndex = Math.Min(wordIndex + 1, words.Count - 1);
+                wordIndex = Math.Min(wordIndex + 1, lines[lineIndex].Count - 1);
             }
         }
         else
         {
-            words[wordIndex].InputBuffer.Append(key);
+            word.InputBuffer.Append(key);
 
-            // Check if we are done
-            if (wordIndex == words.Count - 1 && words[wordIndex].InputBuffer.ToString() == words[wordIndex].Text)
+            // Check if we are done with this line
+            if (wordIndex == lines[lineIndex].Count - 1)
             {
-                complete = true;
-                timerRunning = false;
+                // For word lessons, only complete the line if the word is correct
+                if (word.InputBuffer.ToString() == word.Text)
+                {
+                    AdvanceLine();
+                }
+                // For raw input lessons, move onto the next line if any key was pressed on the last word
+                else if (lesson.Type == LessonType.Raw && lines[lineIndex][wordIndex].InputBuffer.Length > 0)
+                {
+                    AdvanceLine();
+                }
             }
         }
+    }
+
+    void AdvanceLine()
+    {
+        if (lineIndex >= lines.Count)
+        {
+            complete = true;
+            return;
+        }
+        lineIndex++;
+        wordIndex = 0;
+
+        yOffset += lineGap;
     }
 
     void Backspace(int count)
     {
         if (complete) return;
+        if (lesson.Type != LessonType.Words) return;
+        
         for (int i = 0; i < count; i++)
         {
-            var word = words[wordIndex];
+            var word = lines[lineIndex][wordIndex];
             if (word.InputBuffer.Length == 0)
             {
-                // Go to previous word
-                if (wordIndex > 0)
-                {
-                    wordIndex--;
-                    if (Shared.UserSettings.SmoothScroll)
-                    {
-                        xOffset -= GetWordWidth(words[wordIndex], false);
-                    }
-                }
+                PreviousWord();
             }
             else
             {
@@ -291,9 +336,51 @@ public class PracticeScene : Scene
         }
     }
     
+    void PreviousWord()
+    {
+        if (wordIndex > 0)
+        {
+            wordIndex--;
+            if (Shared.UserSettings.SmoothScroll)
+            {
+                xOffset[lineIndex] -= GetWordWidth(lines[lineIndex][wordIndex], false);
+            }
+        }
+        else if (lineIndex > 0)
+        {
+            lineIndex--;
+            wordIndex = lines[lineIndex].Count - 1;
+            if (Shared.UserSettings.SmoothScroll)
+            {
+                yOffset -= lineGap;
+            }
+        }
+    }
+
     void Stroke(PloverStroke stroke)
     {
+        if (complete) return;
         paper.Add(stroke.Paper);
+
+        if (lesson.Type != LessonType.Raw) return;
+        
+        if (stroke.Rtfcre == "*")
+        {
+            RawInputBackspace();
+            return;
+        }
+
+        foreach (var c in stroke.Rtfcre)
+        {
+            KeyTyped(c);
+        }
+        KeyTyped(' ');
+    }
+
+    void RawInputBackspace()
+    {
+        PreviousWord();
+        lines[lineIndex][wordIndex].InputBuffer.Clear();
     }
 
     /// <summary>
@@ -319,7 +406,7 @@ public class PracticeScene : Scene
         return Util.GetTextWidth(text + " ", primaryFont);
     }
 
-    int DrawWord(Word word, Vector2 pos, bool visited)
+    int DrawWord(Word word, Vector2 pos, bool visited, bool activeLine)
     {
         string text = word.Text;
         StringBuilder buffer = word.InputBuffer;
@@ -359,6 +446,12 @@ public class PracticeScene : Scene
                 str = buffer[i].ToString();
                 color = Shared.AltTextColor;
             }
+
+            if (!activeLine)
+            {
+                color = Shared.TextColor;
+            }
+
             Util.DrawText(primaryFont, str, pos, color);
 
             int width = Util.GetTextWidth(str, primaryFont);
@@ -367,7 +460,7 @@ public class PracticeScene : Scene
         }
 
         // Error underline
-        if (visited && word.Text != word.InputBuffer.ToString())
+        if (activeLine && visited && word.Text != word.InputBuffer.ToString())
         {
             // Move cursor back to the start of the word, and down
             pos.X -= totalWidth;

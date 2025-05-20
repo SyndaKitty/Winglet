@@ -14,10 +14,12 @@ Window.Create(new WindowSettings {
     VSync = true,
 });
 
+
 // Render a single frame to get to blank screen ASAP
 Raylib.BeginDrawing();
 Raylib.ClearBackground(Shared.BackgroundColor);
 Raylib.EndDrawing();
 
-Window.Run(new PracticeScene("Resources/Lessons/lesson01.txt"));
+//Window.Run(new PracticeScene("Resources/Lessons/lesson01.txt"));
+Window.Run(new CourseSelection());
 Environment.Exit(0);

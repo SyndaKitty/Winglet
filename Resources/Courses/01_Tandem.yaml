@@ -1,0 +1,8 @@
+﻿Name: Tandem
+Description: Learn to use your left and right hands together. OwO
+Lessons:
+  - Name: ""
+    Type: raw
+    Order: random
+    Prompts: "S-F S-P S-L S-T S-D S-R S-B S-G S-S S-Z K-F K-P K-L K-T K-D K-R K-B K-G K-S K-Z W-F W-P W-L W-T W-D W-R W-B W-G W-S W-Z R-F R-P R-L R-T R-D R-R R-B R-G R-S R-Z T-F T-P T-L T-T T-D T-R T-B T-G T-S T-Z P-F P-P P-L P-T P-D P-R P-B P-G P-S P-Z H-F H-P H-L H-T H-D H-R H-B H-G H-S H-Z"
+  

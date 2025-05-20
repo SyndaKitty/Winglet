@@ -7,10 +7,14 @@ public class Word
     public StringBuilder InputBuffer;
     public bool Counted;
 
-    public Word(string text, string? input)
+    public Word(string text)
     {
         Text = text;
-        InputExplanation = input;
         InputBuffer = new();
+    }
+
+    public override string ToString()
+    {
+        return Text;
     }
 }

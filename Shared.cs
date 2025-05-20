@@ -18,8 +18,9 @@ public static class Shared
     public static string SecondaryFontFile = "Resources/Hack-Regular.ttf";
 
     public static Dictionary<(string, int), Font> FontCache = [];
-    
     public static UserSettings UserSettings = new();
+    
+    public const int SlideSpeed = 15;
 
     const string Tag = "Shared";
 
