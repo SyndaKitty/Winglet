@@ -1,0 +1,148 @@
+Practice 
+
+Features
+	= Must =
+	Lessons defined by yaml files
+	Show target & input text
+	Detect & remember mistakes
+	Show mistakes clearly
+	Continue on error
+	Show error count
+	Handle plover input gracefully, especially backspaces
+	Paragraph format with wrapped lines
+	Dynamic UI scale
+	Calculate and show WPM
+	Show progress bar
+	Transition to results screen once finished
+	Display paper
+
+	= Limitations =
+	Plover input only
+	non-ascii displayed as '?'
+
+Details
+	YAML file provides type of lesson (raw/words) and a list of words
+		Raw lessons would look for specific keys to be pressed (such as 'SKWR').
+		This is to train layout
+		Word lessons would provide a list of words for the user to type
+	Two spaces between words in lesson file indicates a newline
+	
+	Target words will be shown in the TextColor (light gray)
+	Input words will be showin the AltTextColor (white)
+
+	if the word does not match the target, it will display in red and be underlined
+
+	Mistakes will be defined as when a backspace was needed to finish the word
+		Specifically looking for * key, not plover backspaces which could be expected
+
+	In order to realign after mistakes, word boundaries will be tracked. 
+	Only the current word of the target and input will be compared at a time.
+
+	string targetText;
+	string inputText;
+
+	List<int> targetWordBoundaries;
+	List<int> inputWordBoundaries;
+
+	Each word is really just a Span peeking into the string
+	We can identify each of these using one or more space as the delimiter
+	Make sure to put an extra delimiter in the back if it ends with a space, this is to properly handle suffix spaces
+
+	Input:
+	" test word with space in front"
+	  1    6    11   16    22 25
+
+	Target:
+	"test word with space in front"
+	 0    5    10   15    21 24
+
+	Input:
+	"test word with space in back "
+	 0    5    10   15    21 24   29  
+
+	Every time input changes we can recalculate words
+	Not the most efficient but honestly input shouldn't be fast enough to cause any issue
+
+	So what is the flow like?
+	targetText = load(file)
+	targetBounds = calcBounds(targetText)
+
+	when(input):
+		inputText += input
+		inputBounds = calcBounds(inputText)
+
+	for i = 0,max(#inputBounds, #targetBounds):
+		iword = getInputWord(i)
+		tword = getTargetWord(i)
+		width = max(iword.length, tword.length)
+		
+		color = (white if (matched or last input word) else red)
+		writeText(tWord)
+		writeText(iWord)
+
+		x += width
+
+	Anytime a * key on its own is detected, the current word (both target & input) will be tracked
+	
+	Trivial case
+	Target:
+		taller | TAUL/*ER
+	Input:
+		" tall"    | TAUL  |
+		" talling" | -G    |
+		" tall"    | *     | error input: "talling" vs "taller"
+		" taller"  | *ER   |
+
+	Target:
+		falling | TPAUL/-G
+	Input
+		TPAUL/-B/*/-G
+	    " fall"    | TPAUL | naive approach would give "be" vs next target word as error
+	    " fall be" | -B    | detect that * brought you to the middle of the previous target word, not the end
+	    " fall"    | *     | in that case, the previous word must not have been complete and the next word was added by mistake
+	    " falling" | -G    | correct error input: "fall be" vs "falling"
+
+	How are we counting errors?
+	Maybe for each target word, if an error is detected for it, we count it only once.
+	If the user mistypes again on the same word it is not counted against them again.
+	Notably if the user types a word correctly, but backspaces back into the word and retypes it WILL count as an error.
+	probably fine
+
+	In order to handle wrapped lines
+
+	y
+	x = start
+	firstWordLine = true
+	maxX
+	for i = 0,max(#inputBounds, #targetBounds):
+		iword = getInputWord(i)
+		tword = getTargetWord(i)
+		width = max(iword.length, tword.length)
+		nextX += width
+		if nextX > maxX and not firstWordLine:
+			nextLine()
+			x = start
+
+		drawWord(iWord, x, y)
+		drawWord(tWord, x, y+10)
+
+		firstWordLine = false
+
+	-- Essentially check before printing if it will bring you too far, if so next line
+	Technically this won't act like proper wrapped text, since we *should* split the word to fit within max width
+	but for the purposes of this app, its not necessary to do so. We know the width of the words and can account for that in maxX
+
+	Dynamic UI scale
+		Settings menu - for this scene alone just load from settings file
+
+
+	WPM calculation is average between
+		WPM since lesson start
+		WPM of the last x words (10?)
+		WPM of the last y seconds (10?)
+
+
+	Progress bar | rect width = (#inputBounds / #targetBounds) * DisplayWidth
+
+	Once final word is written *correctly*, a new ResultScene is created and transitioned to, passing a results object
+	Need to figure out what we are tracking for results and how

@@ -1,9 +1,6 @@
-﻿using ImGuiNET;
-using Raylib_cs;
-using System.Linq;
+﻿using Raylib_cs;
 using System.Numerics;
 using System.Text;
-using YamlDotNet.Core;
 using static Raylib_cs.Raylib;
 
 public class PracticeScene : Scene
@@ -73,15 +70,17 @@ public class PracticeScene : Scene
 
         try
         {
-            bool connected = server.Connect().GetAwaiter().GetResult();
-            if (connected)
-            {
-                input.SetInputMode(Input.Mode.Plover);
-            }
-            else
-            {
-                input.SetInputMode(Input.Mode.Keyboard);
-            }
+            Task.Run(() => {
+                bool connected = server.Connect().GetAwaiter().GetResult();
+                if (connected)
+                {
+                    input.SetInputMode(Input.Mode.Plover);
+                }
+                else
+                {
+                    input.SetInputMode(Input.Mode.Keyboard);
+                }
+            });
         }
         catch
         {
