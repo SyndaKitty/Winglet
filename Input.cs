@@ -2,6 +2,8 @@
 
 public class Input
 {
+    const string Tag = "Input";
+    
     Mode inputMode;
     PloverServer server;
 
@@ -18,6 +20,7 @@ public class Input
 
     public void SetInputMode(Mode inputMode)
     {
+        Log.Info(Tag, $"Setting input mod to {inputMode}");
         this.inputMode = inputMode;
         if (inputMode == Mode.Plover)
         {

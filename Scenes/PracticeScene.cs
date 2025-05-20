@@ -74,7 +74,11 @@ public class PracticeScene : Scene
         try
         {
             bool connected = server.Connect().GetAwaiter().GetResult();
-            if (!connected)
+            if (connected)
+            {
+                input.SetInputMode(Input.Mode.Plover);
+            }
+            else
             {
                 input.SetInputMode(Input.Mode.Keyboard);
             }
@@ -84,7 +88,6 @@ public class PracticeScene : Scene
 
         }
 
-        input.SetInputMode(Input.Mode.Plover);
     }
 
     public void Unload() { }
@@ -320,7 +323,7 @@ public class PracticeScene : Scene
         if (lesson.Type != LessonType.Words) return;
 
         // Stupid hack for skipping space on first word
-        if (wordIndex == 0 && lines[lineIndex][wordIndex].InputBuffer.Length > 0) count--;
+        if (wordIndex == 0 && lines[lineIndex][wordIndex].InputBuffer.Length > 0 && count > 1) count--;
         
         for (int i = 0; i < count; i++)
         {
