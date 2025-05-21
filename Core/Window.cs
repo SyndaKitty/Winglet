@@ -6,7 +6,7 @@ using ImGuiNET;
 public static class Window
 {
     static Scene? currentScene;
-    static bool sceneDirty;
+    static Scene? nextScene;
 
     public static void Create(WindowSettings settings)
     {
@@ -45,14 +45,13 @@ public static class Window
 
         while (!WindowShouldClose())
         {
-            currentScene?.Update();
-            
-            // Avoid running draw before update when swapping scenes
-            if (sceneDirty)
+            if (nextScene != null)
             {
-                sceneDirty = false;
-                continue;
+                LoadScene(nextScene);
+                nextScene = null;
             }
+
+            currentScene?.Update();
 
             BeginDrawing();
             rlImGui.Begin();
@@ -61,7 +60,6 @@ public static class Window
             
             rlImGui.End();
             EndDrawing();
-
         }
 
         rlImGui.Shutdown();
@@ -70,13 +68,17 @@ public static class Window
 
     public static void SetScene(Scene nextScene)
     {
+        Window.nextScene = nextScene;
+    }
+
+    static void LoadScene(Scene newScene)
+    {
         if (currentScene != null)
         {
             currentScene.Unload();
-            sceneDirty = true;
         }
 
-        currentScene = nextScene;
+        currentScene = newScene;
         currentScene.Load();
     }
 }

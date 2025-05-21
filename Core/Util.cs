@@ -90,4 +90,9 @@ public static class Util
         RemoveControlCharsCache[input] = result;
         return result;
     }
+
+    public static int Mod(int x, int m)
+    {
+        return ((x % m) + m) % m;
+    }
 }

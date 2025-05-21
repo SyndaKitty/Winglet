@@ -35,7 +35,9 @@ Details
 	Mistakes will be defined as when a backspace was needed to finish the word
 		Specifically looking for * key, not plover backspaces which could be expected
 
-	In order to realign after mistakes, word boundaries will be tracked. 
+	We need to keep the original inputText buffer intact. Do not remove spaces from plover input.
+	If we did modify it, we can't guarantee that plover backspaces will work as intended anymore.
+	So to handle that, and in order to realign after mistakes, word boundaries will be tracked. 
 	Only the current word of the target and input will be compared at a time.
 
 	string targetText;
@@ -97,16 +99,134 @@ Details
 		falling | TPAUL/-G
 	Input
 		TPAUL/-B/*/-G
-	    " fall"    | TPAUL | naive approach would give "be" vs next target word as error
-	    " fall be" | -B    | detect that * brought you to the middle of the previous target word, not the end
+	    " fall"    | TPAUL | naive approach would give "be" and next target word as error
+	    " fall be" | -B    | instead, detect that * brought you to the middle of the previous target word, not the end
 	    " fall"    | *     | in that case, the previous word must not have been complete and the next word was added by mistake
 	    " falling" | -G    | correct error input: "fall be" vs "falling"
+
+	Target:
+		falling | TPAUL/-G
+	Input
+		TPAUL/-G/-G/-B/*/*
+		" fall"          | TPAUL
+		" falling"       | -G
+		" fallinging"    | -G
+		" fallinging be" | -B
+		" fallinging"    | *      Seems like logic should be, if * brings you back to a word that was not yet correct, then it counts as that word?
+		" falling"       | *      but at some point next word should be counted too. If its more than 1 * to get to the previous word then both will count
+
+	Target:
+		falling farther | TPAUL/-G/TPAR/THER
+	Input
+		TPAUL/-B/TPAR/THER/*/*/*/-G/TPAR/THER
+		" fall"            | TPAUL
+		" fall be"         | -B
+		" fall be far"     | TPAR
+		" fall be farther" | THER              uh oh...
+		" fall be far"     | *
+		" fall be"         | *
+		" fall"            | *
+		" falling"         | -G
+		" falling far"     | TPAR
+		" falling farther" | THER
+
+	"falling farther"
+	"fall be farther"
+	if we don't have a solid match yet, and the last word in the buffer
+	 matches the next expected word, then we assume all but the last word in the buffer
+	 was from attempts on the previous word.
+	 We can attribute those there, and separate at that point.
+
+	Target: "Falling is done blah blah blah"
+	TPAUL/-G/S/TKOPB
+	TPAUL/-G/STKOPB
+	TPAULG/S/TKOPB
+	TPAULG/STKOPB
+
+	Input: TPAUL/-B/STKOPB
+		"fall"
+		"fall be"
+		"fall be is done"
+
+	if not matching
+	loop through each word in the input buffer (skip first)
+	compare to following word
+	if matches, move to next word - in this case we count it as error!
+
+	"fall" - not matching current word, no following word
+	"fall be" - not matching current word, be does not match next word
+	"fall be is done" - not matching current word
+		be doesn't match next word, is DOES match next word
+	Move onto next word
+		word input = "fall be"
+		remaining input = "is done"
+		current target = "is"
+
+
+	Total logic:
+	when(string input):
+		
+
+
+
+
+	TEUTH/-G
+	tithe
+	tithing -- e gets erased
+
+    === worried about this approach, we need accurate and up to date dictionary information ==
+	We will need to understand it at the stroke level, not the text level
+	For each stroke, check if there a valid translation containing the current stroke buffer
+	If not, we move into an error state.
+	We will only leave error state and move onto the next word when the next stroke matches the following word
+	Edge case, we should detect when the user missed a stroke as well.
+
+	Target:
+		falling far | TPAUL/-G/TPAR
+	Input:
+		TPAUL/TPAR
+		" fall"     | TPAUL
+		" fall far" | TPAR     Enter error state, as we missed -G, but immediately resolve as we had the correct stroke for following word.
+
+	Maybe there is no "error state" but rather we will only ever move to the next work on a valid stroke OR previous word complete
+	This would undercount errors if the user had 2 legitimately invalid strokes in a row, 
+	but should make sense to the user why it is not moving to the next word
+
+	pseudo-code:
+		when(stroke):
+			if stroke == "*":
+				stroke_buffer.pop()
+				return
+
+			stroke_buffer.push(stroke)
+			if complete(stroke_buffer) and valid_next(stroke)
+				advance_word()
+			else if not valid(stroke_buffer) and valid_next(stroke_buffer):
+				advance_word()
+	
+	Interestingly, its possible for a word to have multiple translations that overlap.
+	
+	farther has both:
+	TPA*RT
+	TPA*RT/*ER
+	TPAR/THER
+
+	even though the first two contain the same first stroke,
+	following up with *ER is valid, even if it does not change the output
+	given that, we should not move to the next word even if the word is complete.
+
+	Its possible for text and strokes to get out of sync if plover's dictionary is not matching the one in memory
+	Use strokes/in-memory dictionary as source of truth for now.
+	Should probably come up with a better way of handling this
+
+	When out of sync, display won't quite look correct
+	Maybe we just throw an error and let the user know?
 
 	How are we counting errors?
 	Maybe for each target word, if an error is detected for it, we count it only once.
 	If the user mistypes again on the same word it is not counted against them again.
 	Notably if the user types a word correctly, but backspaces back into the word and retypes it WILL count as an error.
-	probably fine
+	probably fine -- I don't want that actually
 
 	In order to handle wrapped lines
 

@@ -17,6 +17,18 @@ public class CourseSelection : Scene
     float yOffset;
     int lineGap => primaryFont.BaseSize + 20;
 
+    PloverServer server;
+    Paper paper;
+
+    public CourseSelection(PloverServer server, Paper? paper = null)
+    {
+        this.server = server;
+        this.paper = paper ?? new();
+
+        Input.OnStenoKeys += HandleKeyInput;
+        Input.OnTextTyped += HandleTextInput;
+    }
+
     public void Load()
     {
         primaryFont = Shared.GetFont(Shared.PrimaryFontFile, 60);
@@ -38,8 +50,7 @@ public class CourseSelection : Scene
 
     public void Update()
     {
-        KeyInput();
-
+        server.DispatchMessages();
         yOffset = Util.ExpDecay(yOffset, 0, Shared.SlideSpeed, Raylib.GetFrameTime());
     }
     
@@ -47,9 +58,11 @@ public class CourseSelection : Scene
     {
         Raylib.ClearBackground(Shared.BackgroundColor);
 
+        (int width, int height) = (Raylib.GetScreenWidth(), Raylib.GetScreenHeight());
+
         Vector2 cursor = new Vector2(0, 0);
-        cursor.X = Raylib.GetScreenWidth() * .25f;
-        cursor.Y = Raylib.GetScreenHeight() / 2 - primaryFont.BaseSize / 2;
+        cursor.X = width * .25f;
+        cursor.Y = height / 2 - primaryFont.BaseSize / 2;
         cursor.Y -= selectedIndex * lineGap + yOffset;
         
         for (int i = 0; i < courses.Count; i++)
@@ -60,16 +73,12 @@ public class CourseSelection : Scene
             cursor.Y += lineGap;
         }
 
+        paper.Draw(new Vector2(width - paper.Width, 0));
     }
 
-    void KeyInput()
+    void KeyPress(string key)
     {
-        if (Raylib.IsKeyPressed(KeyboardKey.Enter))
-        {
-            Window.SetScene(new PracticeScene(courses[selectedIndex].Lessons[0]));
-        }
-
-        if (Raylib.IsKeyPressed(KeyboardKey.Up) || Raylib.IsKeyPressedRepeat(KeyboardKey.Up))
+        if (key == "P-" || key == "-P")
         {
             int prevIndex = selectedIndex;
             selectedIndex = Math.Max(0, selectedIndex - 1);
@@ -79,7 +88,7 @@ public class CourseSelection : Scene
             }
         }
 
-        if (Raylib.IsKeyPressed(KeyboardKey.Down) || Raylib.IsKeyPressedRepeat(KeyboardKey.Down))
+        if (key == "W-" || key == "-B")
         {
             int prevIndex = selectedIndex;
             selectedIndex = Math.Min(courses.Count - 1, selectedIndex + 1);
@@ -87,7 +96,22 @@ public class CourseSelection : Scene
             {
                 yOffset -= lineGap;
             }
+        }
+    }
 
+    void HandleKeyInput(List<string> keys)
+    {
+        foreach (var key in keys)
+        {
+            KeyPress(key);
+        }
+    }
+
+    void HandleTextInput(string text)
+    {
+        if (text == "\n")
+        {
+            Window.SetScene(new PracticeScene(courses[selectedIndex].Lessons[0], server, paper));
         }
     }
 }

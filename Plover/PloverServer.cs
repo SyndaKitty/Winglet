@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections.Concurrent;
 
 /// <summary>
 /// Wraps a raw Plover connections and performs translation of the json messages.
@@ -18,15 +19,28 @@ public class PloverServer
     public delegate void SendBackspaceHandler(PloverBackspace backspace);
     public event SendBackspaceHandler? OnSendBackspace;
 
+    public delegate void OnConnectHandler();
+    public event OnConnectHandler? OnConnect;
+
+    public delegate void OnDisconnectHandler();
+    public event OnDisconnectHandler? OnDisconnect;
+
+    ConcurrentQueue<Delegate> messageQueue;
     PloverConnection connection;
+
     public PloverServer()
     {
+        messageQueue = new();
         connection = new();
+
+        // Enqueue the event invocation to a queue, so the main thread can process it
+        connection.OnConnect += () => messageQueue.Enqueue(() => OnConnect?.Invoke());
+        connection.OnDisconnect += () => messageQueue.Enqueue(() => OnDisconnect?.Invoke());
+        connection.OnMessage += (string message) => messageQueue.Enqueue(() => ReceiveMessage(message));
     }
 
     public async Task<bool> Connect()
     {
-        connection.OnMessage += ReceiveMessage;
         bool connected = await connection.Connect();
         if (!connected)
         {
@@ -38,17 +52,25 @@ public class PloverServer
         return true;
     }
 
-    public void ReceiveMessage(string message)
+    public void DispatchMessages()
+    {
+        while (messageQueue.TryDequeue(out var message))
+        {
+            message.DynamicInvoke();
+        }
+    }
+
+    void ReceiveMessage(string message)
     {
         var deserialized = JsonConvert.DeserializeObject(message);
-        if (deserialized is null || deserialized is not JObject)
+        if (deserialized is JObject j)
+        {
+            Translate(j);
+        }
+        else
         {
             Log.Error(Tag, "Failed to deserialize message");
-            return;
         }
-        
-        var json = (JObject)deserialized;
-        Translate(json);
     }
 
     void Translate(JObject json)

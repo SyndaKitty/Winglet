@@ -4,6 +4,8 @@ using Tomlyn;
 
 public static class Shared
 {
+    const string Tag = "Shared";
+    
     public static Color BackgroundColor = new Color(51, 58, 69);
     public static Color PanelColor = new Color(44, 49, 59);
     public static Color AccentColor = new Color(244, 76, 127);
@@ -21,8 +23,6 @@ public static class Shared
     public static UserSettings UserSettings = new();
     
     public const int SlideSpeed = 15;
-
-    const string Tag = "Shared";
 
     public static Font GetFont(string fontFile, int fontSize)
     {

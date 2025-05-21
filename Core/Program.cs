@@ -14,12 +14,21 @@ Window.Create(new WindowSettings {
     VSync = true,
 });
 
-
 // Render a single frame to get to blank screen ASAP
 Raylib.BeginDrawing();
 Raylib.ClearBackground(Shared.BackgroundColor);
 Raylib.EndDrawing();
 
-//Window.Run(new PracticeScene("Resources/Lessons/lesson01.txt"));
-Window.Run(new CourseSelection());
-Environment.Exit(0);
+PloverServer server = new();
+Input.SetServer(server);
+
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+{
+    Task.Run(server.Connect);
+}
+#pragma warning restore CS4014
+
+Window.Run(new CourseSelection(server));
+//Window.Run(new PracticeScene(Course.Load("Resources/Courses/00_Introductions.yaml")?.Lessons[0]));
+
+Log.Stop();

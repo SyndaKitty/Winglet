@@ -58,6 +58,11 @@ public static class Log
         logThread.Start();
     }
 
+    public static void Stop()
+    {
+        isLogging = false;
+    }
+
     public static void Info(string tag, string message, bool ignoreFilter = false)
     {
         EnqueueLog(Severity.Info, tag, message, ignoreFilter);
@@ -123,7 +128,7 @@ public static class Log
 
     static void LogThread()
     {
-        while (isLogging)
+        while (isLogging || logQueue.Any())
         {
             if (logQueue.TryDequeue(out var info))
             {

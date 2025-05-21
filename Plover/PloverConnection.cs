@@ -24,6 +24,12 @@ public class PloverConnection
     public delegate void MessageReceivedHandler(string message);
     public event MessageReceivedHandler? OnMessage;
 
+    public delegate void OnConnectHandler();
+    public event OnConnectHandler? OnConnect;
+
+    public delegate void OnDisconnectHandler();
+    public event OnDisconnectHandler? OnDisconnect;
+
     public string ServerHost
     {
         get { return serverConfig.host; }
@@ -72,7 +78,8 @@ public class PloverConnection
         try
         {
             await webSocket.ConnectAsync(url, CancellationToken.None);
-            Log.Info(Tag, "Connected successfully");
+            Log.Info(Tag, "Connected to Plover");
+            OnConnect?.Invoke();
 
             return true;
         }
@@ -130,6 +137,9 @@ public class PloverConnection
                 Log.Error(Tag, "Failed to decrypt message");
             }
         }
+
+        Log.Info(Tag, "Disconnected from Plover");
+        OnDisconnect?.Invoke();
     }
 
     async Task SendMessage(ClientWebSocket webSocket, string message)
