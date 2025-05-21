@@ -1,11 +1,11 @@
 ﻿using static Raylib_cs.Raylib;
 using Raylib_cs;
 using rlImGui_cs;
-using ImGuiNET;
-using System.Numerics;
 
 public static class Window
 {
+    const string Tag = "Window";
+
     static Scene? currentScene;
     static Scene? nextScene;
 
@@ -61,8 +61,11 @@ public static class Window
             
             rlImGui.End();
             EndDrawing();
+
+            Log.DispatchMessages();
         }
 
+        Log.Info(Tag, "Beginning shutdown");
         rlImGui.Shutdown();
         CloseWindow();
     }

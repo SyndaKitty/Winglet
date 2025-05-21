@@ -15,6 +15,7 @@ public static class Log
 {
     static string logFilePath;
     static ConcurrentQueue<LogMessageInfo> logQueue;
+    static ConcurrentQueue<LogMessageInfo> messageDispatch;
     static Task logTask;
     static List<string> whitelistTags = new();
     static List<string> blacklistTags = new();
@@ -49,6 +50,7 @@ public static class Log
         logFilePath = Path.Combine(logFileDir, fileName);
 
         logQueue = new();
+        messageDispatch = new();
         cToken = cTokenSource.Token;
 
         using (StreamWriter writer = File.AppendText(logFilePath))
@@ -130,6 +132,7 @@ public static class Log
         };
 
         logQueue.Enqueue(info);
+        messageDispatch.Enqueue(info);
     }
 
     struct LogMessageInfo
@@ -165,13 +168,19 @@ public static class Log
                         Console.WriteLine(info.Message);
                     }
                 }
-
-                OnLogMessage?.Invoke(info.Severity, info.Tag, info.Message, info.IgnoreFilter);
             }
             else
             {
                 Thread.Sleep(10);
             }
+        }
+    }
+
+    public static void DispatchMessages()
+    {
+        while (messageDispatch.TryDequeue(out var message))
+        {
+            OnLogMessage?.Invoke(message.Severity, message.Tag, message.Message, message.IgnoreFilter);
         }
     }
 }

@@ -6,7 +6,7 @@ public class DebugConsole
     const string Tag = "DebugConsole";
     const int MaxLines = 1000;
 
-    CircularBuffer<string> buffer;
+    CircularBuffer<DebugMessage> messages;
     Font font;
     int charWidth;
     bool scrollToBottom;
@@ -15,17 +15,13 @@ public class DebugConsole
     bool[] tagToggles;
     float maxTagWidth;
     List<string> tags;
-    Dictionary<string, int> severityLookup;
-    Dictionary<string, int> messageToTagIndex;
     Dictionary<string, int> tagToIndex;
 
     public DebugConsole()
     {
-        buffer = new(MaxLines);
+        messages = new(MaxLines);
         tags = new();
         tagToggles = Array.Empty<bool>();
-        severityLookup = new();
-        messageToTagIndex = new();
         tagToIndex = new();
         Log.OnLogMessage += HandleLogMessage;
     }
@@ -55,7 +51,6 @@ public class DebugConsole
         float x = 0;
         for (int i = 0; i < tags.Count; i++)
         {
-            ImGui.PushID(i);
             ImGui.Checkbox(tags[i], ref tagToggles[i]);
             float buttonWidth = ImGui.GetItemRectSize().X;
             maxTagWidth = Math.Max(maxTagWidth, buttonWidth);
@@ -71,30 +66,25 @@ public class DebugConsole
             {
                 x = 0;
             }
-            ImGui.PopID();
         }
 
         ImGui.Separator();
 
         ImGui.BeginChild("Debug messages");
-        foreach (var line in buffer)
+        foreach (var line in messages)
         {
-            if (line is null) continue;
+            if (line.Text is null) continue;
 
-            if (severityToggles.Any(x => x))
+            if (severityToggles.Any(x => x) && !severityToggles[(int)line.Severity])
             {
-                if (!severityLookup.TryGetValue(line, out int sev) || !severityToggles[sev])
-                {
-                    continue;
-                }
+                continue;
             }
 
-            if (tagToggles.Any(x => x))
+            if (tagToggles.Any(x => x) && !tagToggles[line.TagIndex])
             {
-                if (!messageToTagIndex.TryGetValue(line, out int tag)) continue;
-                if (!tagToggles[tag]) continue;
+                continue;
             }
-            ImGui.TextWrapped(line);
+            ImGui.TextWrapped(line.Text);
             
             // This is supposed to scroll to the bottom, but it scrolls to the top??
             // the log message order is inverted so it works as expected 
@@ -110,26 +100,32 @@ public class DebugConsole
 
     void HandleLogMessage(Severity sev, string tag, string message, bool ignoreFilter)
     {
-        buffer.Add(message);
-
+        // If there is a new tag, add it to:
+        //  tag list
+        //  tag toggle list
+        //  tag to index lookup
         if (!tagToIndex.ContainsKey(tag))
         {
             tagToIndex.Add(tag, tags.Count);
-            
             tags.Add(tag);
             tagToggles = [..tagToggles, false];
         }
-        if (!messageToTagIndex.ContainsKey(message))
+        
+        messages.Add(new DebugMessage 
         {
-            int index = tagToIndex[tag];
-            messageToTagIndex.Add(message, index);
-        }
+            Severity = sev,
+            TagIndex = tagToIndex[tag],
+            Text = message
+        });
 
-        if (!severityLookup.ContainsKey(message)) 
-        {
-            severityLookup.Add(message, (int)sev);
-        }
         scrollToBottom = true;
+    }
+
+    struct DebugMessage
+    {
+        public string? Text { get; set; }
+        public Severity Severity { get; set; }
+        public int TagIndex { get; set; }
     }
 
     // For testing purposes
