@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 /// <summary>
 /// Wraps a raw Plover connections and performs translation of the json messages.
 /// Callbacks are provided to handle the messages.
+/// DispatchMessages must be called to invoke the queued callbacks.
 /// </summary>
 public class PloverServer
 {
@@ -25,13 +26,16 @@ public class PloverServer
     public delegate void OnDisconnectHandler();
     public event OnDisconnectHandler? OnDisconnect;
 
-    ConcurrentQueue<Delegate> messageQueue;
+    ConcurrentQueue<Action> messageQueue;
     PloverConnection connection;
+    Task readTask;
+    SemaphoreSlim connectingSemaphore;
 
     public PloverServer()
     {
         messageQueue = new();
         connection = new();
+        connectingSemaphore = new(1, 1);
 
         // Enqueue the event invocation to a queue, so the main thread can process it
         connection.OnConnect += () => messageQueue.Enqueue(() => OnConnect?.Invoke());
@@ -41,22 +45,48 @@ public class PloverServer
 
     public async Task<bool> Connect()
     {
-        bool connected = await connection.Connect();
-        if (!connected)
+        await connectingSemaphore.WaitAsync();
+        try
         {
+            if (readTask != null)
+            {
+                Log.Info(Tag, "Closing existing connection");
+                Close();
+            }
+
+            bool connected = await connection.Connect();
+            if (!connected)
+            {
+                return false;
+            }
+            readTask = connection.BeginReading();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(Tag, $"Error encountered when connecting to Plover: {ex}");
             return false;
         }
-
-        connection.BeginReading();
+        finally
+        {
+            connectingSemaphore.Release();
+        }
+        
         Log.Info(Tag, "Began reading successfully");
         return true;
+    }
+
+    public void Close()
+    {
+        connection.Close();
+        readTask?.Wait();
+        Log.Info(Tag, "Connection closed");
     }
 
     public void DispatchMessages()
     {
         while (messageQueue.TryDequeue(out var message))
         {
-            message.DynamicInvoke();
+            message.Invoke();
         }
     }
 

@@ -30,6 +30,9 @@ public class PloverConnection
     public delegate void OnDisconnectHandler();
     public event OnDisconnectHandler? OnDisconnect;
 
+    CancellationTokenSource cTokenSource;
+    CancellationToken cToken;
+
     public string ServerHost
     {
         get { return serverConfig.host; }
@@ -54,6 +57,7 @@ public class PloverConnection
 
         // Generate random nonce
         rnd = RandomNumberGenerator.Create();
+        cTokenSource = new();
     }
 
     public async Task<bool> Connect()
@@ -78,6 +82,7 @@ public class PloverConnection
         try
         {
             await webSocket.ConnectAsync(url, CancellationToken.None);
+            cToken = cTokenSource.Token;
             Log.Info(Tag, "Connected to Plover");
             OnConnect?.Invoke();
 
@@ -90,9 +95,19 @@ public class PloverConnection
         }
     }
 
-    public void BeginReading()
+    public Task BeginReading()
     {
-        Task.Run(ReadLoop);
+        return Task.Run(ReadLoop);
+    }
+
+    public void Close()
+    {
+        if (webSocket is null)
+        {
+            Log.Error(Tag, "No active connection to Plover server.");
+            return;
+        }
+        cTokenSource.Cancel();
     }
 
     async Task ReadLoop()
@@ -105,7 +120,7 @@ public class PloverConnection
             return;
         }
 
-        while (webSocket.State == WebSocketState.Open)
+        while (webSocket.State == WebSocketState.Open && !cToken.IsCancellationRequested)
         {
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
