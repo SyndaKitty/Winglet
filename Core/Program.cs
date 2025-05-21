@@ -19,16 +19,13 @@ Raylib.BeginDrawing();
 Raylib.ClearBackground(Shared.BackgroundColor);
 Raylib.EndDrawing();
 
+DebugConsole console = new();
 PloverServer server = new();
 Input.SetServer(server);
 
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-{
-    Task.Run(server.Connect);
-}
-#pragma warning restore CS4014
+_ = Task.Run(server.Connect);
 
-Window.Run(new CourseSelection(server));
+Window.Run(new CourseSelection(server, console, null));
 //Window.Run(new PracticeScene(Course.Load("Resources/Courses/00_Introductions.yaml")?.Lessons[0]));
 
 Log.Stop();

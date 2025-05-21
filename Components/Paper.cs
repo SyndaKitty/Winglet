@@ -4,14 +4,14 @@ using System.Numerics;
 public class Paper
 {
     Font font;
-    int smallCharWidth;
+    int charWidth;
     CircularBuffer<string> buffer;
 
     const int PaperChars = 23;
     const int PaperLines = 10;
     const int DefaultFontSize = 30;
 
-    public int Width => smallCharWidth * PaperChars;
+    public int Width => charWidth * PaperChars;
     public int Height => font.BaseSize * PaperLines;
 
     public Paper()
@@ -25,7 +25,7 @@ public class Paper
     public void SetFont(Font font)
     {
         this.font = font;
-        smallCharWidth = Util.GetTextWidth(" ", font);
+        charWidth = Util.GetTextWidth(" ", font);
     }
 
     public void Draw(Vector2 topLeft)

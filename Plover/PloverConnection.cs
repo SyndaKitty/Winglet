@@ -144,7 +144,7 @@ public class PloverConnection
             {
                 string message = Encoding.UTF8.GetString(decipheredMessage);
                 
-                Log.Info(Tag, $"Plover: {message}");
+                Log.Trace(Tag, $"Plover: {message}");
                 OnMessage?.Invoke(message);
             }
             else

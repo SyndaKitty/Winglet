@@ -19,11 +19,16 @@ public class CourseSelection : Scene
 
     PloverServer server;
     Paper paper;
+    DebugConsole console;
 
-    public CourseSelection(PloverServer server, Paper? paper = null)
+    bool expectNewline;
+    bool gotNewline;
+
+    public CourseSelection(PloverServer server, DebugConsole? console, Paper? paper)
     {
         this.server = server;
         this.paper = paper ?? new();
+        this.console = console ?? new();
 
         Input.OnStenoKeys += HandleKeyInput;
         Input.OnTextTyped += HandleTextInput;
@@ -52,6 +57,14 @@ public class CourseSelection : Scene
     {
         server.DispatchMessages();
         yOffset = Util.ExpDecay(yOffset, 0, Shared.SlideSpeed, Raylib.GetFrameTime());
+
+        if (expectNewline && !gotNewline)
+        {
+            Log.Warning(Tag, "Plover sent enter keys, but no newline received. Is output enabled?");
+        }
+
+        expectNewline = false;
+        gotNewline = false;
     }
     
     public void Draw()
@@ -74,6 +87,7 @@ public class CourseSelection : Scene
         }
 
         paper.Draw(new Vector2(width - paper.Width, 0));
+        console.Draw();
     }
 
     void KeyPress(string key)
@@ -105,12 +119,26 @@ public class CourseSelection : Scene
         {
             KeyPress(key);
         }
+        CheckForEnterKeys(keys);
+    }
+
+    void CheckForEnterKeys(List<string> keys)
+    {
+        if (keys.Count == 2)
+        {
+            var combo = (keys[0], keys[1]);
+            if (combo == ("R-", "-R") || combo == ("-R", "R-"))
+            {
+                expectNewline = true;
+            }
+        }
     }
 
     void HandleTextInput(string text)
     {
         if (text == "\n")
         {
+            gotNewline = true;
             Window.SetScene(new PracticeScene(courses[selectedIndex].Lessons[0], server, paper));
         }
     }

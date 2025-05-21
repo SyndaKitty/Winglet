@@ -15,20 +15,24 @@ public static class Log
 {
     static string logFilePath;
     static ConcurrentQueue<LogMessageInfo> logQueue;
-    static Thread logThread;
-    static bool isLogging;
+    static Task logTask;
     static List<string> whitelistTags = new();
     static List<string> blacklistTags = new();
     static Severity Severity = Severity.All;
+    static CancellationTokenSource cTokenSource = new();
+    static CancellationToken cToken;
 
-    static List<string> SeverityTag = [
-        "[All  ]",
-        "[Trace]",
-        "[Info ]",
-        "[Warn ]",
-        "[Error]",
-        "[Fatal]",
-        "[None ]"
+    public delegate void HandleLogMessage(Severity severity, string tag, string message, bool ignoreFilter);
+    public static event HandleLogMessage? OnLogMessage;
+        
+    public static List<string> SeverityTag = [
+        "[ALL  ]",
+        "[TRACE]",
+        "[INFO ]",
+        "[WARN ]",
+        "[ERROR]",
+        "[FATAL]",
+        "[NONE ]"
     ];
 
     static Log()
@@ -45,7 +49,7 @@ public static class Log
         logFilePath = Path.Combine(logFileDir, fileName);
 
         logQueue = new();
-        isLogging = true;
+        cToken = cTokenSource.Token;
 
         using (StreamWriter writer = File.AppendText(logFilePath))
         {
@@ -54,13 +58,13 @@ public static class Log
         }
         Console.WriteLine($"Log file created at: {logFilePath}");
 
-        logThread = new Thread(LogThread);
-        logThread.Start();
+        logTask = Task.Run(LogThread);
     }
 
     public static void Stop()
     {
-        isLogging = false;
+        cTokenSource.Cancel();
+        logTask.Wait();
     }
 
     public static void Info(string tag, string message, bool ignoreFilter = false)
@@ -105,8 +109,18 @@ public static class Log
 
     static void EnqueueLog(Severity severity, string tag, string message, bool ignoreFilter)
     {
+        string? threadName = Thread.CurrentThread.Name;
         string currentTime = DateTime.Now.ToString("HH:mm:ss.fff");
-        string logMessage = $"[{currentTime}] {SeverityTag[(int)severity]} [{tag}] {message}";
+
+        string logMessage;
+        if (threadName != null) 
+        {
+            logMessage = $"[{currentTime}] {SeverityTag[(int)severity]} [{tag}] [{threadName}] {message}";
+        }
+        else
+        {
+            logMessage = $"[{currentTime}] {SeverityTag[(int)severity]} [{tag}] {message}";
+        }
 
         var info = new LogMessageInfo {
             Message = logMessage,
@@ -128,7 +142,7 @@ public static class Log
 
     static void LogThread()
     {
-        while (isLogging || logQueue.Any())
+        while (logQueue.Any() || !cToken.IsCancellationRequested)
         {
             if (logQueue.TryDequeue(out var info))
             {
@@ -151,6 +165,8 @@ public static class Log
                         Console.WriteLine(info.Message);
                     }
                 }
+
+                OnLogMessage?.Invoke(info.Severity, info.Tag, info.Message, info.IgnoreFilter);
             }
             else
             {
