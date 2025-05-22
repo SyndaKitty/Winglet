@@ -23,27 +23,10 @@ public class Course
 
 public class CourseLesson
 {
-    public string Name = "";
-    public LessonType Type;
-    public LessonOrder Order;
-    public string Prompts = "";
-
-    public List<List<Word>> GetWords()
-    {
-        List<List<Word>> outputLines = [];
-        var rawLines = Prompts.Split("  ");
-        foreach (var line in rawLines)
-        {
-            var words = line.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(x => new Word(x)).ToList();
-            if (Order == LessonOrder.Random)
-            {
-                words = words.OrderBy(x => Guid.NewGuid()).ToList();
-            }
-            outputLines.Add(words);
-        }
-
-        return outputLines;
-    }
+    public string? Name { get; set; }
+    public LessonType Type { get; set; }
+    public LessonOrder Order { get; set; }
+    public string? Prompts { get; set; }
 }
 
 public enum LessonType

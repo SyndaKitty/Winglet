@@ -9,7 +9,7 @@ public class Paper
 
     const int PaperChars = 23;
     const int PaperLines = 10;
-    const int DefaultFontSize = 30;
+    const int DefaultFontSize = 20;
 
     public int Width => charWidth * PaperChars;
     public int Height => font.BaseSize * PaperLines;

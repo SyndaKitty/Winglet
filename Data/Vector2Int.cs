@@ -25,7 +25,7 @@ public struct Vector2Int : IEquatable<Vector2Int>
         Y = y;
     }
 
-    public override bool Equals(object other)
+    public override bool Equals(object? other)
     {
         if (other is Vector2Int v)
         {

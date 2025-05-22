@@ -39,16 +39,20 @@ public static class Input
 
     static void HandleString(PloverString str)
     {
+        string formatted = str.Text.Replace("\n", "\\n").Replace("\"", "\\\"");
+        Log.Trace(Tag, $"Text typed: \"{formatted}\"");
         OnTextTyped?.Invoke(str.Text);
     }
 
     static void HandleBackspace(PloverBackspace backspace)
     {
+        Log.Trace(Tag, $"Backspaces: {backspace.Count}");
         OnBackspace?.Invoke(backspace.Count);
     }
 
     static void HandleStroke(PloverStroke stroke)
     {
+        Log.Trace(Tag, $"Stroke: [{string.Join(',', stroke.Keys)}] [{stroke.Rtfcre}] [{stroke.Paper}]");
         OnStenoKeys?.Invoke(stroke.Keys);
         OnStroke?.Invoke(stroke.Rtfcre);
         OnPaper?.Invoke(stroke.Paper);

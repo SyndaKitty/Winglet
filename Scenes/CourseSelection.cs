@@ -139,7 +139,7 @@ public class CourseSelection : Scene
         if (text == "\n")
         {
             gotNewline = true;
-            Window.SetScene(new PracticeScene(courses[selectedIndex].Lessons[0], server, paper));
+            Window.SetScene(new PracticeScene(courses[selectedIndex].Lessons[0], server, console, paper));
         }
     }
 }

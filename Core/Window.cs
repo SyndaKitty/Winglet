@@ -1,6 +1,7 @@
 ﻿using static Raylib_cs.Raylib;
 using Raylib_cs;
 using rlImGui_cs;
+using ImGuiNET;
 
 public static class Window
 {
@@ -31,13 +32,13 @@ public static class Window
 
     public static void Run(Scene startScene)
     {
-        //rlImGui.SetupUserFonts += (ImGuiIOPtr ptr) => {
-        //    var fontPtr = ptr.Fonts.AddFontFromFileTTF("Resources/Hack-Regular.ttf", 16);
-        //    unsafe
-        //    {
-        //        ptr.NativePtr->FontDefault = fontPtr;
-        //    }
-        //};
+        rlImGui.SetupUserFonts += (ImGuiIOPtr ptr) => {
+            var fontPtr = ptr.Fonts.AddFontFromFileTTF("Resources/Hack-Regular.ttf", 14);
+            unsafe
+            {
+                ptr.NativePtr->FontDefault = fontPtr;
+            }
+        };
 
         rlImGui.Setup(true);
         //ImGuiTheme.SetupImGuiStyle();

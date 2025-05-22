@@ -4,5 +4,5 @@ Lessons:
   - Name: "asd"
     Type: words
     Order: random
-    Prompts: "bop pop top lop sop  rap tap sap lap"
+    Prompts: "bop is done top lop sop rap tap sap lap We will need to understand it at the stroke level, not the text level For each stroke, check if there a valid translation containing the current stroke buffer If not, we move into an error state. We will only leave error state and move onto the next word when the next stroke matches the following word Edge case, we should detect when the user missed a stroke as well."
   

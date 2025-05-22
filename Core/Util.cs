@@ -94,5 +94,30 @@ public static class Util
     public static int Mod(int x, int m)
     {
         return ((x % m) + m) % m;
+    }   
+}
+
+public static class StringHelper
+{
+    /// <summary>
+    /// Get the index of the nth occurrence of <paramref name="search"/> in the string.
+    /// Returns -1 if there is not that many occurrences in the string
+    /// </summary>
+    public static int IndexOfInstance(this string str, char search, int occurrence)
+    {
+        var c = str.ToCharArray();
+        int count = 0;
+        for (int i = 0; i < c.Length; i++)
+        {
+            if (c[i] == search)
+            {
+                count++;
+                if (count == occurrence)
+                {
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 }

@@ -20,11 +20,6 @@ public class WPM
         timesSinceWordFinished = [];
     }
 
-    public void WordTyped(Word word)
-    {
-        timesSinceWordFinished.Add(0);
-        wordTypedCount += 1;
-    }
 
     public void Update()
     {

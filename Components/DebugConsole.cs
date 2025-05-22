@@ -9,7 +9,7 @@ public class DebugConsole
     CircularBuffer<DebugMessage> messages;
     Font font;
     int charWidth;
-    bool scrollToBottom;
+    //bool scrollToBottom;
     bool[] severityToggles = [false, false, false, false, false, false];
     
     bool[] tagToggles;
@@ -31,7 +31,6 @@ public class DebugConsole
         this.font = font;
         charWidth = Util.GetTextWidth(" ", font);
     }
-
     public void Draw()
     {
         ImGui.Begin("Debug Console");
@@ -44,6 +43,8 @@ public class DebugConsole
                 ImGui.SameLine();
             }
         }
+
+        ImGui.Separator();
 
         var style = ImGui.GetStyle();
 
@@ -118,7 +119,7 @@ public class DebugConsole
             Text = message
         });
 
-        scrollToBottom = true;
+        //scrollToBottom = true;
     }
 
     struct DebugMessage

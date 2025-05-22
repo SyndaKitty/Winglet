@@ -28,7 +28,7 @@ public class PloverServer
 
     ConcurrentQueue<Action> messageQueue;
     PloverConnection connection;
-    Task readTask;
+    Task? readTask;
     SemaphoreSlim connectingSemaphore;
 
     public PloverServer()
