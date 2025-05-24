@@ -27,6 +27,7 @@ public class CourseLesson
     public LessonType Type { get; set; }
     public LessonOrder Order { get; set; }
     public string? Prompts { get; set; }
+    public LessonSettings Settings { get; set; }
 }
 
 public enum LessonType
@@ -39,4 +40,20 @@ public enum LessonOrder
 {
     Ordered,
     Random,
+}
+
+public struct LessonSettings
+{
+    public bool StrictSpaces { get; set; }
+    public bool StrictSymbols { get; set; }
+    public bool StrictCase { get; set; }
+    public bool OnlyAdvanceWhenNextWordCorrect { get; set; }
+
+    public static LessonSettings Default => new LessonSettings 
+    {
+        StrictSpaces = false,
+        StrictSymbols = false,
+        StrictCase = false,
+        OnlyAdvanceWhenNextWordCorrect = true,
+    };
 }

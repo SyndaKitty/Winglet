@@ -21,7 +21,7 @@ public static class Shared
 
     public static Dictionary<(string, int), Font> FontCache = [];
     public static UserSettings UserSettings = new();
-    
+
     public const int SlideSpeed = 15;
 
     public static Font GetFont(string fontFile, int fontSize)

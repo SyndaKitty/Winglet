@@ -1,4 +1,5 @@
-﻿using Raylib_cs;
+﻿using ImGuiNET;
+using Raylib_cs;
 using System.Numerics;
 using System.Text;
 using static Raylib_cs.Raylib;
@@ -20,6 +21,7 @@ public class PracticeScene : Scene
 
     // Smooth scrolling
     float yOffset;
+    float prevY;
     
     // Progress bar
     float smoothProgressPercent = 0;
@@ -48,7 +50,6 @@ public class PracticeScene : Scene
         this.console = console;
         wpm = new();
         words = new();
-        //recordedInput = new();
 
         targetText = lesson.Prompts ?? "";
         // Do something else for strict spaces
@@ -120,55 +121,106 @@ public class PracticeScene : Scene
 
     void DrawWords(int leftMost, int width)
     {
+        if (words.Count == 0) return;
+
         const int vPadding = 10;
         const int hPadding = 40;
+        
         int rightMost = leftMost + width - hPadding;
         leftMost += hPadding;
 
-        Vector2 cursor = new Vector2(leftMost, GetScreenHeight() / 2);
+        // Calculate word positions ahead of time, relative to first word
+        // This is so that we can center the current word 
+
+        List<(Vector2 pos, string topWord, string bottomWord)> wordInfo = [];
+
+        Vector2 cursor = new();
+        int fontWidth = Util.GetTextWidth(" ", primaryFont);
+        
+        // Since we might add words due to splitting input, we'll need to recalculate the current index
+        int currentWordIndex = this.currentWordIndex;
+
         foreach (var word in words)
         {
-            string inputWord = word.InputBuffer.ToString().Trim();
-            int targetWidth = Util.GetTextWidth(" " + word.Target, primaryFont);
-            int inputWidth = Util.GetTextWidth(" " + inputWord, primaryFont);
-            int textWidth = Math.Max(targetWidth, inputWidth);
-
-            if (cursor.X + textWidth > rightMost - hPadding)
+            string trimmedInput = word.InputBuffer.ToString().Trim();
+            string[] subInput = trimmedInput.Split(' ');
+            for (int i = 0; i < subInput.Length; i++)
             {
-                cursor.Y += (primaryFont.BaseSize + vPadding) * 2;
-                cursor.X = leftMost;
-            }
+                string iWord = subInput[i];
+                if (i > 0) currentWordIndex++;
 
-            Util.DrawText(primaryFont, inputWord, cursor, Shared.AltTextColor);
-            cursor.Y += primaryFont.BaseSize;
-            Util.DrawText(primaryFont, word.Target, cursor, Shared.TextColor);
-            
-            cursor.X += textWidth;
-            cursor.Y -= primaryFont.BaseSize;
+                string targetWord = (i == 0) ? word.Target : "";
+                int targetWidth = Util.GetTextWidth(targetWord, primaryFont);
+
+                int inputWidth = Util.GetTextWidth(iWord, primaryFont);
+                int textWidth = Math.Max(targetWidth, inputWidth) + fontWidth;
+
+                if (cursor.X + textWidth > width - hPadding * 2)
+                {
+                    cursor.Y += (primaryFont.BaseSize + vPadding) * 2;
+                    cursor.X = 0;
+                }
+                wordInfo.Add((cursor, iWord, targetWord));
+
+                cursor.X += textWidth;
+            }
+        }
+
+        // Adjust positions so that current word is centered, and words are aligned within block
+        int yCenter = GetScreenHeight() / 2 - primaryFont.BaseSize * 2;
+        Vector2 offset = new(leftMost + hPadding, yCenter - wordInfo[currentWordIndex].pos.Y);
+
+        float rawY = offset.Y;
+        if (Shared.UserSettings.SmoothScroll)
+        {
+            if (offset.Y != prevY)
+            {
+                yOffset = offset.Y - prevY;
+            }
+            prevY = rawY;
+            offset.Y -= yOffset;
+        }
+
+        for (int i = 0; i <  wordInfo.Count; i++)
+        {
+            var info = wordInfo[i];
+            wordInfo[i] = (info.pos + offset, info.topWord, info.bottomWord);
+        }
+        
+        // Draw words
+        foreach (var info in wordInfo)
+        {
+            Vector2 pos = info.pos;
+
+            Util.DrawText(primaryFont, info.topWord, pos, Shared.AltTextColor);
+            pos.Y += primaryFont.BaseSize;
+            Util.DrawText(primaryFont, info.bottomWord, pos, Shared.TextColor);
         }
     }
 
     void TextChanged()
     {
+        // Why is this method so cursed?
+
         var word = words[currentWordIndex];
         var inputWord = word.InputBuffer.ToString();
         if (inputWord.Trim() == word.Target)
         {
-            currentWordIndex++;
+            currentWordIndex = Math.Min(currentWordIndex + 1, words.Count - 1);
             Log.Trace(Tag, $"Now on word {currentWordIndex}: {words[currentWordIndex].Target}");
         }
         else if (currentWordIndex < words.Count - 1)
         {
-            // add back trimmed spaces
-            inputWord = word.InputBuffer.ToString();
             var inputWords = inputWord.Split(" ");
             var nextWord = words[currentWordIndex + 1].Target;
             for (int i = 1; i < inputWords.Length; i++)
             {
+                if (i == 1 && inputWords[0].Trim() == "") continue;
                 if (inputWords[i] == nextWord)
                 {
                     // Split the input into two, where the second part contains the new word
                     int splitPoint = inputWord.IndexOfInstance(' ', i);
+                    if (splitPoint == 0) return;
 
                     string prevPart = inputWord.Substring(0, splitPoint);
                     string nextPart = inputWord.Substring(splitPoint);
@@ -234,33 +286,6 @@ public class PracticeScene : Scene
         paper.SetFont(smallFont);
     }
 
-    List<(int start, int length)> CalculateWordBoundaries(StringBuilder buffer)
-    {
-        List<(int start, int length)> boundaries = [];
-
-        bool inWord = false;
-        int wordStart = -1;
-        for (int i = 0; i < buffer.Length; i++)
-        {
-            if (!inWord && buffer[i] != ' ')
-            {
-                inWord = true;
-                wordStart = i;
-            }
-            else if (inWord && buffer[i] == ' ')
-            {
-                inWord = false;
-                boundaries.Add((wordStart, i - wordStart));
-            }
-        }
-        if (inWord)
-        {
-           boundaries.Add((wordStart, buffer.Length - wordStart));
-        }
-
-        return boundaries;
-    }
-
     string FormatTime(float time)
     {
         int minutes = (int)(time / 60);
@@ -281,6 +306,8 @@ public class PracticeScene : Scene
     public void Update()
     {
         server.DispatchMessages();
+
+        yOffset = Util.ExpDecay(yOffset, 0, Shared.SlideSpeed, Raylib.GetFrameTime());
     }
 
     class Word
