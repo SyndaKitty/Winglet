@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using Raylib_cs;
+using System.Numerics;
 
 public class DebugConsole
 {
@@ -85,8 +86,14 @@ public class DebugConsole
             {
                 continue;
             }
-            ImGui.TextWrapped(line.Text);
+
+            Vector4 color;
             
+            
+            ImGui.PushStyleColor(ImGuiCol.Text, GetLineColor(line.Severity));
+            ImGui.TextWrapped(line.Text);
+            ImGui.PopStyleColor();
+
             // This is supposed to scroll to the bottom, but it scrolls to the top??
             // the log message order is inverted so it works as expected 
             //if (scrollToBottom)
@@ -97,6 +104,26 @@ public class DebugConsole
         }
         ImGui.EndChild();
         ImGui.End();
+    }
+
+    Vector4 GetLineColor(Severity sev)
+    {
+        //Vector4 color;
+        Color color;
+        if (sev == Severity.Warning)
+        {
+            color = Shared.WarningTextColor;
+        }
+        else if (sev == Severity.Error || sev == Severity.Warning)
+        {
+            color = Shared.ErrTextColor;
+        }
+        else unsafe
+        {
+            return *ImGui.GetStyleColorVec4(ImGuiCol.Text);
+        }
+
+        return new Vector4(color.R, color.G, color.B, color.A) / 255f;
     }
 
     void HandleLogMessage(Severity sev, string tag, string message, bool ignoreFilter)

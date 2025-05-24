@@ -16,6 +16,14 @@ public static class Util
         Raylib.DrawTextEx(font, text, pos, font.BaseSize, 0, color);
     }
 
+    public static void DrawRectangle(Vector2 pos, Vector2 size, Color color)
+    {
+        Vector2Int posInt = new(pos);
+        Vector2Int sizeInt = new(size);
+
+        Raylib.DrawRectangle(posInt.X, posInt.Y, sizeInt.X, sizeInt.Y, color);
+    }
+
     public static unsafe int GetTextWidth(string text, Font font)
     {
         const int GetCodepointError = 0x3f;
@@ -100,24 +108,32 @@ public static class Util
 public static class StringHelper
 {
     /// <summary>
-    /// Get the index of the nth occurrence of <paramref name="search"/> in the string.
+    /// Get the index of the <paramref name="n"/>th occurrence of <paramref name="search"/> in the string.
     /// Returns -1 if there is not that many occurrences in the string
     /// </summary>
-    public static int IndexOfInstance(this string str, char search, int occurrence)
+    public static int IndexOfInstance(this string str, char search, int n)
+    {
+        var indices = str.GetIndicesOf(search);
+        if (n-1 < indices.Count)
+        {
+            return indices[n-1];
+        }
+        return -1;
+    }
+
+    public static List<int> GetIndicesOf(this string str, char search)
     {
         var c = str.ToCharArray();
-        int count = 0;
+        List<int> indices = new();
+
         for (int i = 0; i < c.Length; i++)
         {
             if (c[i] == search)
             {
-                count++;
-                if (count == occurrence)
-                {
-                    return i;
-                }
+                indices.Add(i);
             }
         }
-        return -1;
+
+        return indices;
     }
 }

@@ -266,3 +266,12 @@ Details
 
 	Once final word is written *correctly*, a new ResultScene is created and transitioned to, passing a results object
 	Need to figure out what we are tracking for results and how
+
+ 
+
+ if all are true, hard error:
+ 	backspace to middle of word
+ 	stroke
+ 	does not match previous input stroke
+ 	soft error = true
+ 	

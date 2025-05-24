@@ -1,5 +1,4 @@
-﻿using ImGuiNET;
-using Raylib_cs;
+﻿using Raylib_cs;
 using System.Numerics;
 using System.Text;
 using static Raylib_cs.Raylib;
@@ -15,13 +14,12 @@ public class PracticeScene : Scene
 
     // Words
     string targetText;
-    //List<(int start, int length)> targetWordBoundaries;
     List<Word> words;
     int currentWordIndex;
 
     // Smooth scrolling
     float yOffset;
-    float prevY;
+    float prevY = -1;
     
     // Progress bar
     float smoothProgressPercent = 0;
@@ -52,7 +50,7 @@ public class PracticeScene : Scene
         words = new();
 
         targetText = lesson.Prompts ?? "";
-        // Do something else for strict spaces
+        // TODO Do something else for strict spaces
         var targetWords = targetText.Split(" ", StringSplitOptions.RemoveEmptyEntries);
         words = targetWords.Select(w => new Word {
             Target = w
@@ -67,7 +65,11 @@ public class PracticeScene : Scene
         SetFontSize(40);
     }
 
-    public void Unload() { }
+    public void Unload() 
+    {
+        Input.OnTextTyped -= OnTextTyped;
+        Input.OnBackspace -= OnBackspace;
+    }
     
     public void Draw() 
     {
@@ -110,8 +112,7 @@ public class PracticeScene : Scene
         
         // Draw progress bar
         const int progressBarHeight = 20;
-        //float progressPercent = (lines.Take(lineIndex).Sum(x => x.Count) + wordIndex) / (float)totalWordCount;
-        float progressPercent = 0;
+        float progressPercent = (float)currentWordIndex / words.Count;
         smoothProgressPercent = Util.ExpDecay(smoothProgressPercent, progressPercent, Shared.SlideSpeed, GetFrameTime());
         int progressPixels = (int)(GetScreenWidth() * smoothProgressPercent);
         DrawRectangle(0, GetScreenHeight() - progressBarHeight, progressPixels, progressBarHeight  + 1, Shared.AltTextColor);
@@ -124,13 +125,13 @@ public class PracticeScene : Scene
         if (words.Count == 0) return;
 
         const int vPadding = 10;
-        const int hPadding = 40;
+        const int hPadding = 160;
         
-        int rightMost = leftMost + width - hPadding;
+        int rightMost = width - hPadding;
         leftMost += hPadding;
 
         // Calculate word positions ahead of time, relative to first word
-        // This is so that we can center the current word 
+        // so that we can center the current word 
 
         List<(Vector2 pos, string topWord, string bottomWord)> wordInfo = [];
 
@@ -173,7 +174,7 @@ public class PracticeScene : Scene
         float rawY = offset.Y;
         if (Shared.UserSettings.SmoothScroll)
         {
-            if (offset.Y != prevY)
+            if (offset.Y != prevY && prevY != -1)
             {
                 yOffset = offset.Y - prevY;
             }
@@ -192,7 +193,17 @@ public class PracticeScene : Scene
         {
             Vector2 pos = info.pos;
 
-            Util.DrawText(primaryFont, info.topWord, pos, Shared.AltTextColor);
+            Color inputWordColor = Shared.AltTextColor;
+            if (info.topWord.Trim() != info.bottomWord)
+            {
+                inputWordColor = Shared.ErrTextColor;
+                Vector2 underlinePos = new(pos.X, pos.Y + primaryFont.BaseSize * .9f);
+                Vector2 underlineSize = new(Util.GetTextWidth(info.topWord, primaryFont), primaryFont.BaseSize * .05f);
+                Util.DrawRectangle(underlinePos, underlineSize, Color.Red);
+            }
+
+            Util.DrawText(primaryFont, info.topWord, pos, inputWordColor);
+
             pos.Y += primaryFont.BaseSize;
             Util.DrawText(primaryFont, info.bottomWord, pos, Shared.TextColor);
         }
@@ -202,19 +213,25 @@ public class PracticeScene : Scene
     {
         // Why is this method so cursed?
 
+        timeSinceType = 0;
+
         var word = words[currentWordIndex];
         var inputWord = word.InputBuffer.ToString();
         if (inputWord.Trim() == word.Target)
         {
-            currentWordIndex = Math.Min(currentWordIndex + 1, words.Count - 1);
+            AdvanceWord();
             Log.Trace(Tag, $"Now on word {currentWordIndex}: {words[currentWordIndex].Target}");
         }
         else if (currentWordIndex < words.Count - 1)
         {
             var inputWords = inputWord.Split(" ");
             var nextWord = words[currentWordIndex + 1].Target;
+            
+            // Check if part of the input matches the next word
+            // We only check the second word onward
             for (int i = 1; i < inputWords.Length; i++)
             {
+                // If the first "word" is just a space, don't consider it
                 if (i == 1 && inputWords[0].Trim() == "") continue;
                 if (inputWords[i] == nextWord)
                 {
@@ -228,7 +245,7 @@ public class PracticeScene : Scene
                     Log.Trace(Tag, $"Found valid next word, splitting input buffer. prevPart: \"{prevPart}\" nextPart: \"{nextPart}\"");
                     word.InputBuffer = new(prevPart);
 
-                    currentWordIndex++;
+                    AdvanceWord();
                     words[currentWordIndex].InputBuffer = new(nextPart);
 
                     TextChanged();
@@ -238,6 +255,19 @@ public class PracticeScene : Scene
         }
     }
 
+    void AdvanceWord()
+    {
+        currentWordIndex = Math.Min(currentWordIndex + 1, words.Count - 1);
+
+        for (int i = 0; i < currentWordIndex - 1; i++)
+        {
+            var word = words[i];
+            if (word.InputBuffer.ToString().Trim() != word.Target)
+            {
+                word.SoftError = true;
+            }
+        }
+    }
     void OnBackspace(int count)
     {
         var buffer = words[currentWordIndex].InputBuffer;
@@ -307,13 +337,28 @@ public class PracticeScene : Scene
     {
         server.DispatchMessages();
 
-        yOffset = Util.ExpDecay(yOffset, 0, Shared.SlideSpeed, Raylib.GetFrameTime());
+        yOffset = Util.ExpDecay(yOffset, 0, Shared.SlideSpeed, GetFrameTime());
+
+        timeSinceType += GetFrameTime();
+        if (timeSinceType > StopTimingThreshold)
+        {
+            timerRunning = false;
+        }
     }
 
     class Word
     {
         public string Target = "";
         public StringBuilder InputBuffer = new();
+        
+        // Could be incorrectly flagged due to a word taking multiple strokes
+        // one of which translated to backspaces
+        public bool SoftError = false;
+        
+        // User manually backspaced in the word to correct
+        public bool Backspaced = false;
+
+        public bool AnyError => SoftError || Backspaced;
 
         public void Add(string text)
         {

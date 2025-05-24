@@ -51,7 +51,11 @@ public class CourseSelection : Scene
         }
     }
 
-    public void Unload() { }
+    public void Unload() 
+    {
+        Input.OnStenoKeys -= HandleKeyInput;
+        Input.OnTextTyped -= HandleTextInput;
+    }
 
     public void Update()
     {

@@ -16,6 +16,8 @@ public static class Shared
     public static Color ErrTextColor = new Color(218, 51, 51);
     public static Color AltErrTextColor = new Color(121, 23, 23);
 
+    public static Color WarningTextColor = new Color(238, 242, 125);
+
     public static string PrimaryFontFile = "Resources/Hack-Regular.ttf";
     public static string SecondaryFontFile = "Resources/Hack-Regular.ttf";
 
