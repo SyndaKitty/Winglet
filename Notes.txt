@@ -275,3 +275,4 @@ Details
  	does not match previous input stroke
  	soft error = true
  	
+NCRA: The National Court Reporters Association defines a “word” as 1.4 syllables. This is the measure used for official NCRA testing material.

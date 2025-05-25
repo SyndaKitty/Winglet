@@ -16,9 +16,15 @@ public static class Window
         InitWindow(settings.Width, settings.Height, settings.Title ?? "");
         SetWindowMinSize(settings.MinSize.Item1, settings.MinSize.Item2);
         SetTargetFPS(settings.TargetFPS ?? 60);
+
         if (settings.Resizable)
         {
             SetWindowState(ConfigFlags.ResizableWindow);
+        }
+
+        if (settings.MSAA)
+        {
+            SetWindowState(ConfigFlags.Msaa4xHint);
         }
 
         Shared.LoadUserSettings();
@@ -97,4 +103,5 @@ public struct WindowSettings
     public (int, int) MinSize;
     public bool Resizable;
     public bool VSync;
+    public bool MSAA;
 }

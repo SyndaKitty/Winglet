@@ -24,6 +24,17 @@ public static class Util
         Raylib.DrawRectangle(posInt.X, posInt.Y, sizeInt.X, sizeInt.Y, color);
     }
 
+    public static void DrawRectangle(Vector2 pos, Vector2 size, Color color, float roundness)
+    {
+        Raylib.DrawRectangleRounded(
+            new Rectangle { 
+                X = pos.X, Y = pos.Y, 
+                Width = size.X, Height = size.Y 
+            }, 
+            roundness, 0, color
+        );
+    }
+
     public static unsafe int GetTextWidth(string text, Font font)
     {
         const int GetCodepointError = 0x3f;

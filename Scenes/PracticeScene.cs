@@ -40,12 +40,16 @@ public class PracticeScene : Scene
     // Console
     DebugConsole console;
 
-    public PracticeScene(CourseLesson lesson, PloverServer server, DebugConsole console, Paper paper)
+    // Keyboard
+    KeyboardDisplay keyboard;
+
+    public PracticeScene(CourseLesson lesson, PloverServer server, DebugConsole console, Paper paper, KeyboardDisplay keyboard)
     {
         this.lesson = lesson;
         this.server = server;
-        this.paper = paper;
-        this.console = console;
+        this.paper = paper ?? new();
+        this.console = console ?? new();
+        this.keyboard = keyboard ?? new();
         wpm = new();
         words = new();
 
@@ -92,6 +96,8 @@ public class PracticeScene : Scene
         cursor.X = 0;
         cursor.Y = 0;
         paper.Draw(cursor);
+
+        keyboard.Draw(new Vector2(0, 0), leftPanelWidth);
 
         Color timerColor = Shared.TextColor;
         if (timerRunning)

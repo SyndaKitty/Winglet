@@ -20,15 +20,17 @@ public class CourseSelection : Scene
     PloverServer server;
     Paper paper;
     DebugConsole console;
+    KeyboardDisplay keyboard;
 
     bool expectNewline;
     bool gotNewline;
 
-    public CourseSelection(PloverServer server, DebugConsole? console, Paper? paper)
+    public CourseSelection(PloverServer server, DebugConsole? console, Paper? paper, KeyboardDisplay? keyboard)
     {
         this.server = server;
         this.paper = paper ?? new();
         this.console = console ?? new();
+        this.keyboard = keyboard ?? new KeyboardDisplay();
 
         Input.OnStenoKeys += HandleKeyInput;
         Input.OnTextTyped += HandleTextInput;
@@ -92,6 +94,7 @@ public class CourseSelection : Scene
 
         paper.Draw(new Vector2(width - paper.Width, 0));
         console.Draw();
+        keyboard.Draw(new(width * .3f, 20f), width * .3f);
     }
 
     void KeyPress(string key)
@@ -143,7 +146,7 @@ public class CourseSelection : Scene
         if (text == "\n")
         {
             gotNewline = true;
-            Window.SetScene(new PracticeScene(courses[selectedIndex].Lessons[0], server, console, paper));
+            Window.SetScene(new PracticeScene(courses[selectedIndex].Lessons[0], server, console, paper, keyboard));
         }
     }
 }

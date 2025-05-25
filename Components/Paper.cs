@@ -22,6 +22,11 @@ public class Paper
         SetFont(Shared.GetFont(Shared.PrimaryFontFile, DefaultFontSize));
     }
 
+    ~Paper()
+    {
+        Input.OnPaper -= HandlePaper;
+    }
+
     public void SetFont(Font font)
     {
         this.font = font;
