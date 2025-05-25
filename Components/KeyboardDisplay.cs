@@ -37,8 +37,6 @@ public class KeyboardDisplay
     void HandleKeys(List<string> keys)
     {
         lastPressed = keys.ToHashSet();
-
-
     }
 
     public void Draw(Vector2 pos, float width)
@@ -123,21 +121,18 @@ public class KeyboardDisplay
                 Height = size.Y
             };
 
-            // back
+            // Back panel
             Color backingColor = Shared.PanelColor;
             if (pressed) backingColor = Shared.AccentColor;
             Util.DrawRectangle(pos, size, backingColor);
 
-            // letter
+            // Letter
             Color letterColor = Shared.AccentColor;
             if (pressed) letterColor = Shared.PanelColor;
             Util.DrawText(font, keys[i].display, pos + letterOffset, letterColor);
             
-            // border
+            // Border
             Raylib.DrawRectangleLinesEx(rect, lineThickness, Shared.AccentColor);
-            
-            //Raylib.DrawRectangleRoundedLinesEx(rect, Roundness, 100, lineThickness, Shared.AccentColor);
-            //Util.DrawRectangle(pos, size, Shared.AccentColor, Roundness);
 
             pos.X += size.X + gap;
         }

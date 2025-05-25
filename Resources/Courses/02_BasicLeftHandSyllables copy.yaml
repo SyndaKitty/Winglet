@@ -1,0 +1,12 @@
+Name: Basic left hand single syllable words
+Description: Learn to use your left and right hands together. OwO
+Lessons:
+  - Name: Basic left hand single syllable words
+    Type: words
+    Order: random
+    Prompts: staff star stab stag stat store stop step stet stead stuff stub stud scar scab scat scad scoff score scot scuff skull scud spar spag spat spazz spore spot spell sped spur spud shall shag shat shad shove shore shop shot shod shell shed sure shut thug thus thud trap trad trot trod tress tread truss chaff char chap chat chad chore chop chess chub chug crap crab crag crass crop cross cress cred crud prag prat prof prop prod pref prep press shrub throb threat thread
+    Settings:
+      StrictSpaces: false
+      StrictSymbols: false
+      StrictCase: false
+      OnlyAdvanceWhenNextWordCorrect: true

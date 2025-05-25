@@ -14,15 +14,23 @@ public class WPM
     int lastWPM = 0;
     int wordTypedCount = 0;
     float timeElapsed = 0;
+    int charsTyped = 0;
+    float timeSinceStart = 0;
 
     public WPM()
     {
         timesSinceWordFinished = [];
     }
 
+    public void WordTyped(string word)
+    {
+        timesSinceWordFinished.Add(0);
+        charsTyped += word.Length + 1; // Add space
+    }
 
     public void Update()
     {
+        timeSinceStart += Raylib.GetFrameTime();
         for (int i = 0; i < timesSinceWordFinished.Count; i++)
         {
             timesSinceWordFinished[i] += Raylib.GetFrameTime();
@@ -48,6 +56,8 @@ public class WPM
     //  total WPM since lesson start
     int CalculateWPM()
     {
+        return (int)MathF.Round(charsTyped / 5f * 60f / timeSinceStart);
+
         float count = 0;
         int firstValidIndex = -1;
         for (int i = 0; i < timesSinceWordFinished.Count; i++)

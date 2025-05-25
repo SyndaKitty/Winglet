@@ -16,6 +16,7 @@ public class PracticeScene : Scene
     string targetText;
     List<Word> words;
     int currentWordIndex;
+    int maxWordIndex;
 
     // Smooth scrolling
     float yOffset;
@@ -53,10 +54,7 @@ public class PracticeScene : Scene
         wpm = new();
         words = new();
 
-        targetText = lesson.Prompts ?? "";
-        // TODO Do something else for strict spaces
-        var targetWords = targetText.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-        words = targetWords.Select(w => new Word {
+        words = lesson.GetWords().Select(w => new Word {
             Target = w
         }).ToList();
 
@@ -97,7 +95,8 @@ public class PracticeScene : Scene
         cursor.Y = 0;
         paper.Draw(cursor);
 
-        keyboard.Draw(new Vector2(0, 0), leftPanelWidth);
+        float keyboardWidth = 600f;
+        keyboard.Draw(new Vector2(GetScreenWidth() / 2 - keyboardWidth / 2, padding), keyboardWidth);
 
         Color timerColor = Shared.TextColor;
         if (timerRunning)
@@ -220,13 +219,13 @@ public class PracticeScene : Scene
         // Why is this method so cursed?
 
         timeSinceType = 0;
+        timerRunning = true;
 
         var word = words[currentWordIndex];
         var inputWord = word.InputBuffer.ToString();
         if (inputWord.Trim() == word.Target)
         {
             AdvanceWord();
-            Log.Trace(Tag, $"Now on word {currentWordIndex}: {words[currentWordIndex].Target}");
         }
         else if (currentWordIndex < words.Count - 1)
         {
@@ -264,7 +263,15 @@ public class PracticeScene : Scene
     void AdvanceWord()
     {
         currentWordIndex = Math.Min(currentWordIndex + 1, words.Count - 1);
+        Log.Trace(Tag, $"Now on word {currentWordIndex}: {words[currentWordIndex].Target}");
 
+        if (currentWordIndex > maxWordIndex)
+        {
+            maxWordIndex = currentWordIndex;
+            wpm.WordTyped(words[currentWordIndex].Target);
+        }
+        
+        // Check for soft errors
         for (int i = 0; i < currentWordIndex - 1; i++)
         {
             var word = words[i];
@@ -350,6 +357,13 @@ public class PracticeScene : Scene
         {
             timerRunning = false;
         }
+
+        if (timerRunning)
+        {
+            timer += GetFrameTime();
+            wpm.Update();
+        }
+
     }
 
     class Word

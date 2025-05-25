@@ -28,6 +28,17 @@ public class CourseLesson
     public LessonOrder Order { get; set; }
     public string? Prompts { get; set; }
     public LessonSettings Settings { get; set; }
+
+    public List<string> GetWords()
+    {
+        var words = Prompts?.Split(" ", StringSplitOptions.RemoveEmptyEntries) ?? [];
+        if (Order == LessonOrder.Random)
+        {
+            Util.Shuffle(words);
+        }
+
+        return words.ToList();
+    }
 }
 
 public enum LessonType

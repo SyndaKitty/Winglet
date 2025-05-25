@@ -113,7 +113,19 @@ public static class Util
     public static int Mod(int x, int m)
     {
         return ((x % m) + m) % m;
-    }   
+    }
+
+    public static void Shuffle<T>(IList<T> list)
+    {
+        var rng = new Random();
+        int n = list.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = rng.Next(n + 1);
+            (list[k], list[n]) = (list[n], list[k]);
+        }
+    }
 }
 
 public static class StringHelper

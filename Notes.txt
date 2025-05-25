@@ -148,27 +148,7 @@ Details
 		"fall be"
 		"fall be is done"
 
-	if not matching
-	loop through each word in the input buffer (skip first)
-	compare to following word
-	if matches, move to next word - in this case we count it as error!
-
-	"fall" - not matching current word, no following word
-	"fall be" - not matching current word, be does not match next word
-	"fall be is done" - not matching current word
-		be doesn't match next word, is DOES match next word
-	Move onto next word
-		word input = "fall be"
-		remaining input = "is done"
-		current target = "is"
-
-
-	Total logic:
-	when(string input):
-		
-
-
-
+ rap rap
 
 	TEUTH/-G
 	tithe
@@ -274,5 +254,24 @@ Details
  	stroke
  	does not match previous input stroke
  	soft error = true
- 	
+
 NCRA: The National Court Reporters Association defines a “word” as 1.4 syllables. This is the measure used for official NCRA testing material.
+
+https://github.com/arxanas/plover_wpm_meter/blob/8d39155409f2d909faac32cdb31cd5e5a716b6c7/plover_wpm_meter/__init__.py#L159C1-L175C50
+def _words_in_chars(chars, method):
+    text = "".join(c for c, _ in chars)
+    if method == "ncra":
+        # The NCRA defines a "word" to be 1.4 syllables, which is the average
+        # number of syllables per English word.
+        syllables_per_word = 1.4
+        # For some reason, textstat returns syllable counts such as a
+        # one-syllable word like "the" being 0.9 syllables.
+        syllables_in_text = textstat.syllable_count(text) / 0.9
+        return syllables_in_text * (1 / syllables_per_word)
+    elif method == "traditional":
+        # Formal definition; see https://en.wikipedia.org/wiki/Words_per_minute
+        return len(text) / 5
+    elif method == "spaces":
+        return len([i for i in text.split() if i])
+    else:
+        assert False, "bad wpm method: " + method

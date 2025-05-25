@@ -17,4 +17,3 @@ Lessons:
     Type: raw
     Order: ordered
     Prompts: "-S -G -B -R -S -G -B -R  -R -B -G -S -R -B -G -S  -B -B -B  -S -S -S  -G -G -G  -R -R -R  -R -B -G -S -B -R -B -R  -S -G -B -R -B -S -G -B  -R -G -B -B -G -G -S -S  -S -B -S -B -R -R -B -S  -S -R -R -B -S -S -S -B  -G -G -G -S -R -R -S -R  -S -S -B -G -R -R -R -R  -R -R -G -S -G -G -B -S  -S -B -S -S -R -R -G -S"
-  

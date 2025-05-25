@@ -19,13 +19,25 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Resources\Courses\01_Tandem.yaml">
+    <None Update="Resources\Courses\01_Introductions.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Courses\01_SingleSyllables.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Courses\02_BasicLeftHandSyllables copy.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Courses\02_Tandem.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Courses\00_Introductions.yaml">
+    <None Update="Resources\Courses\00_Keys.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Courses\03_SingleSyllableDBLWords copy.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Courses\04_Test.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Dictionaries\lapwing-base.json">
