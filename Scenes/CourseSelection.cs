@@ -39,6 +39,7 @@ public class CourseSelection : Scene
     public void Load()
     {
         primaryFont = Shared.GetFont(Shared.PrimaryFontFile, 60);
+        courses.Clear();
 
         var courseFiles = Directory.GetFiles(CoursePath, "*.yaml", SearchOption.TopDirectoryOnly)
             .OrderBy(x => x);
@@ -146,7 +147,7 @@ public class CourseSelection : Scene
         if (text == "\n")
         {
             gotNewline = true;
-            Window.SetScene(new PracticeScene(courses[selectedIndex].Lessons[0], server, console, paper, keyboard));
+            Window.PushScene(new PracticeScene(courses[selectedIndex].Lessons[0], server, console, paper, keyboard));
         }
     }
 }

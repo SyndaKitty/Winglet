@@ -7,8 +7,9 @@ public static class Window
 {
     const string Tag = "Window";
 
-    static Scene? currentScene;
-    static Scene? nextScene;
+    static Scene? currentScene => sceneStack.Any() ? sceneStack.First() : null;
+    static List<(Scene? scene, SceneChange type)> sceneActions = [];
+    static Stack<Scene> sceneStack = [];
 
     public static void Create(WindowSettings settings)
     {
@@ -53,18 +54,18 @@ public static class Window
 
         while (!WindowShouldClose())
         {
-            if (nextScene != null)
+            if (sceneActions.Count > 0)
             {
-                LoadScene(nextScene);
-                nextScene = null;
+                ProcessSceneActions();
             }
 
+            var scene = currentScene;
             currentScene?.Update();
 
             BeginDrawing();
             rlImGui.Begin();
             
-            currentScene?.Draw();
+            scene?.Draw();
             
             rlImGui.End();
             EndDrawing();
@@ -77,20 +78,54 @@ public static class Window
         CloseWindow();
     }
 
-    public static void SetScene(Scene nextScene)
+    public static void PushScene(Scene nextScene)
     {
-        Window.nextScene = nextScene;
+        sceneActions.Add((nextScene, SceneChange.Push));
     }
 
-    static void LoadScene(Scene newScene)
+    public static void PopScene()
     {
-        if (currentScene != null)
-        {
-            currentScene.Unload();
-        }
+        sceneActions.Add((null, SceneChange.Pop));
+    }
 
-        currentScene = newScene;
-        currentScene.Load();
+    public static void SetScene(Scene nextScene)
+    {
+        sceneActions.Add((nextScene, SceneChange.Set));
+    }
+
+    static void ProcessSceneActions()
+    {
+        foreach (var action in sceneActions)
+        {
+            if (currentScene != null)
+            {
+                currentScene.Unload();
+            }
+
+            if (action.type == SceneChange.Set)
+            {
+                sceneStack.Clear();
+                sceneStack.Push(action.scene!);
+            }
+            else if (action.type == SceneChange.Push)
+            {
+                sceneStack.Push(action.scene!);
+            }
+            else if (action.type == SceneChange.Pop)
+            {
+                sceneStack.Pop();
+            }
+
+            currentScene?.Load();
+        }
+        sceneActions.Clear();
+    }
+
+    enum SceneChange
+    {
+        Push,
+        Pop,
+        Set
     }
 }
 

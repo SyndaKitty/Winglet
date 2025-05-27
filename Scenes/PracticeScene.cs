@@ -45,6 +45,9 @@ public class PracticeScene : Scene
     // Keyboard
     KeyboardDisplay keyboard;
 
+    // Keycombo detection
+    KeyCombo exitKeys;
+
     public PracticeScene(CourseLesson lesson, PloverServer server, DebugConsole console, Paper paper, KeyboardDisplay keyboard)
     {
         this.lesson = lesson;
@@ -54,6 +57,7 @@ public class PracticeScene : Scene
         this.keyboard = keyboard ?? new();
         wpm = new();
         words = new();
+        exitKeys = new("R-R", "R-R");
 
         words = lesson.GetWords().Select(w => new Word {
             Target = w
@@ -61,6 +65,9 @@ public class PracticeScene : Scene
 
         Input.OnTextTyped += OnTextTyped;
         Input.OnBackspace += OnBackspace;
+        Input.OnStroke += OnStroke;
+
+        exitKeys.OnMatch += Exit;
     }
 
     public void Load() 
@@ -72,6 +79,7 @@ public class PracticeScene : Scene
     {
         Input.OnTextTyped -= OnTextTyped;
         Input.OnBackspace -= OnBackspace;
+        Input.OnStroke -= OnStroke;
     }
     
     public void Draw() 
@@ -316,6 +324,11 @@ public class PracticeScene : Scene
         }
     }
 
+    void OnStroke(string stroke)
+    {
+
+    }
+
     void OnBackspace(int count)
     {
         if (done) return;
@@ -370,6 +383,11 @@ public class PracticeScene : Scene
 
         timerRunning = false;
         done = true;
+    }
+
+    void Exit()
+    {
+        Window.PopScene();
     }
 
     void SetFontSize(int fontSize)

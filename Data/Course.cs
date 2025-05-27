@@ -42,7 +42,8 @@ public class CourseLesson
 
     public override int GetHashCode()
     {
-        return (Name ?? "").GetHashCode() ^ (Prompts ?? "").GetHashCode();
+        // Used when logging lessons, to help ensure lesson content has not changed
+        return Util.ConsistentStringHash(Name) ^ Util.ConsistentStringHash(Prompts);
     }
 }
 
