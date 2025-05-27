@@ -1,4 +1,5 @@
-﻿using Raylib_cs;
+﻿using ImGuiNET;
+using Raylib_cs;
 using System.Runtime.InteropServices;
 using Tomlyn;
 
@@ -138,5 +139,13 @@ public static class Shared
         
         Log.Info(Tag, $"Archiving old settings file to {newPath}");
         File.Move(path, newPath, true);
+    }
+
+    public static void RecordLessonResult(CourseLesson lesson, int wpm, int mistakes)
+    {
+        string resultFilePath = Path.Combine(GetApplicationPath(), "ResultLog.txt");
+        string logLine = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss},Lesson: {lesson.Name},WPM: {wpm},Mistakes: {mistakes},Hash: {lesson.GetHashCode()}\n";
+
+        File.AppendAllText(resultFilePath, logLine);
     }
 }

@@ -39,6 +39,11 @@ public class CourseLesson
 
         return words.ToList();
     }
+
+    public override int GetHashCode()
+    {
+        return (Name ?? "").GetHashCode() ^ (Prompts ?? "").GetHashCode();
+    }
 }
 
 public enum LessonType

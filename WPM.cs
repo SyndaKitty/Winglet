@@ -39,9 +39,9 @@ public class WPM
         timeElapsed += Raylib.GetFrameTime();
     }
 
-    public int GetWPM()
+    public int GetWPM(bool recalculate = false)
     {
-        if (timeSinceLastCalculation >= CalculationInterval)
+        if (timeSinceLastCalculation >= CalculationInterval || recalculate)
         {
             lastWPM = CalculateWPM();
             timeSinceLastCalculation = 0f;

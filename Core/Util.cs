@@ -126,6 +126,16 @@ public static class Util
             (list[k], list[n]) = (list[n], list[k]);
         }
     }
+
+    public static float Lerp(float a, float b, float t)
+    {
+        return a + (b - a) * t;
+    }
+
+    public static float InvLerp(float a, float b, float val)
+    {
+        return (val - a) / (b - a);
+    }
 }
 
 public static class StringHelper

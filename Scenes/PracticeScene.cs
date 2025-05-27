@@ -11,12 +11,13 @@ public class PracticeScene : Scene
     PloverServer server;
     WPM wpm;
     Paper paper;
+    bool done;
 
     // Words
-    string targetText;
     List<Word> words;
     int currentWordIndex;
     int maxWordIndex;
+    Word currentWord => words[currentWordIndex];
 
     // Smooth scrolling
     float yOffset;
@@ -118,6 +119,7 @@ public class PracticeScene : Scene
         // Draw progress bar
         const int progressBarHeight = 20;
         float progressPercent = (float)currentWordIndex / words.Count;
+        if (done) progressPercent = 1;
         smoothProgressPercent = Util.ExpDecay(smoothProgressPercent, progressPercent, Shared.SlideSpeed, GetFrameTime());
         int progressPixels = (int)(GetScreenWidth() * smoothProgressPercent);
         DrawRectangle(0, GetScreenHeight() - progressBarHeight, progressPixels, progressBarHeight  + 1, Shared.AltTextColor);
@@ -138,7 +140,7 @@ public class PracticeScene : Scene
         // Calculate word positions ahead of time, relative to first word
         // so that we can center the current word 
 
-        List<(Vector2 pos, string topWord, string bottomWord)> wordInfo = [];
+        List<(Vector2 pos, Word word, string topWord, string bottomWord)> wordInfo = [];
 
         Vector2 cursor = new();
         int fontWidth = Util.GetTextWidth(" ", primaryFont);
@@ -166,7 +168,7 @@ public class PracticeScene : Scene
                     cursor.Y += (primaryFont.BaseSize + vPadding) * 2;
                     cursor.X = 0;
                 }
-                wordInfo.Add((cursor, iWord, targetWord));
+                wordInfo.Add((cursor, word, iWord, targetWord));
 
                 cursor.X += textWidth;
             }
@@ -190,7 +192,7 @@ public class PracticeScene : Scene
         for (int i = 0; i <  wordInfo.Count; i++)
         {
             var info = wordInfo[i];
-            wordInfo[i] = (info.pos + offset, info.topWord, info.bottomWord);
+            wordInfo[i] = (info.pos + offset, info.word, info.topWord, info.bottomWord);
         }
         
         // Draw words
@@ -198,24 +200,43 @@ public class PracticeScene : Scene
         {
             Vector2 pos = info.pos;
 
-            Color inputWordColor = Shared.AltTextColor;
-            if (info.topWord.Trim() != info.bottomWord)
+            byte alpha = 255;
+            float yPercent = Util.InvLerp(0, GetScreenHeight(), pos.Y);
+            if (yPercent < .3)
             {
-                inputWordColor = Shared.ErrTextColor;
-                Vector2 underlinePos = new(pos.X, pos.Y + primaryFont.BaseSize * .9f);
-                Vector2 underlineSize = new(Util.GetTextWidth(info.topWord, primaryFont), primaryFont.BaseSize * .05f);
-                Util.DrawRectangle(underlinePos, underlineSize, Color.Red);
+                alpha = (byte)(Math.Max(0, Util.InvLerp(.2f, .3f, yPercent)) * 255f);
             }
 
+            Color inputWordColor = Shared.AltTextColor;
+
+            bool mismatch = info.topWord.Trim() != info.bottomWord;
+            if (mismatch)
+            {
+                inputWordColor = Shared.ErrTextColor;
+            }
+            if (mismatch || info.word.Backspaced)
+            {
+                Vector2 underlinePos = new(pos.X, pos.Y + primaryFont.BaseSize * .9f);
+                Vector2 underlineSize = new(Util.GetTextWidth(info.topWord, primaryFont), primaryFont.BaseSize * .05f);
+
+                var color = Shared.ErrTextColor;
+                color.A = alpha;
+                Util.DrawRectangle(underlinePos, underlineSize, color);
+            }
+
+            inputWordColor.A = alpha;
             Util.DrawText(primaryFont, info.topWord, pos, inputWordColor);
 
             pos.Y += primaryFont.BaseSize;
-            Util.DrawText(primaryFont, info.bottomWord, pos, Shared.TextColor);
+            var textColor = Shared.TextColor;
+            textColor.A = alpha;
+            Util.DrawText(primaryFont, info.bottomWord, pos, textColor);
         }
     }
 
     void TextChanged()
     {
+        if (done) return;
         // Why is this method so cursed?
 
         timeSinceType = 0;
@@ -225,7 +246,13 @@ public class PracticeScene : Scene
         var inputWord = word.InputBuffer.ToString();
         if (inputWord.Trim() == word.Target)
         {
+            bool complete = currentWordIndex == words.Count - 1;
             AdvanceWord();
+            
+            if (complete)
+            {
+                CompleteLesson();
+            }
         }
         else if (currentWordIndex < words.Count - 1)
         {
@@ -262,32 +289,46 @@ public class PracticeScene : Scene
 
     void AdvanceWord()
     {
+        if (done) return;
+        var word = words[currentWordIndex];
+        bool wordCorrect = word.Target == word.InputBuffer.ToString().Trim();
+
         currentWordIndex = Math.Min(currentWordIndex + 1, words.Count - 1);
         Log.Trace(Tag, $"Now on word {currentWordIndex}: {words[currentWordIndex].Target}");
 
         if (currentWordIndex > maxWordIndex)
         {
             maxWordIndex = currentWordIndex;
-            wpm.WordTyped(words[currentWordIndex].Target);
+            if (wordCorrect)
+            {
+                wpm.WordTyped(words[currentWordIndex].Target);
+            }
         }
         
         // Check for soft errors
         for (int i = 0; i < currentWordIndex - 1; i++)
         {
-            var word = words[i];
+            word = words[i];
             if (word.InputBuffer.ToString().Trim() != word.Target)
             {
                 word.SoftError = true;
             }
         }
     }
+
     void OnBackspace(int count)
     {
-        var buffer = words[currentWordIndex].InputBuffer;
+        if (done) return;
+        var buffer = currentWord.InputBuffer;
         while (count > 0)
         {
             if (buffer.Length < count)
             {
+                if (currentWord.InputBuffer.Length > 0)
+                {
+                    currentWord.Backspaced = true;
+                }
+                
                 count -= buffer.Length;
                 buffer.Length = 0;
 
@@ -301,6 +342,7 @@ public class PracticeScene : Scene
             }
             else
             {
+                currentWord.Backspaced = true;
                 buffer.Length -= count;
                 count = 0;
             }
@@ -311,10 +353,23 @@ public class PracticeScene : Scene
 
     void OnTextTyped(string text)
     {
+        if (done) return;
         var word = words[currentWordIndex];
         word.Add(text);
         
         TextChanged();
+    }
+
+    void CompleteLesson()
+    {
+        int finalWPM = wpm.GetWPM(true);
+        int mistakeCount = words.Count(x => x.AnyError);
+        
+        Log.Info(Tag, $"Lesson complete. WPM={finalWPM} Mistakes:{mistakeCount}");
+        Shared.RecordLessonResult(lesson, finalWPM, mistakeCount);
+
+        timerRunning = false;
+        done = true;
     }
 
     void SetFontSize(int fontSize)
@@ -383,18 +438,6 @@ public class PracticeScene : Scene
         public void Add(string text)
         {
             InputBuffer.Append(text);
-        }
-
-        public bool Backspace(int count)
-        {
-            if (count > InputBuffer.Length)
-            {
-                InputBuffer.Length = 0;
-                return false;
-            }
-            
-            InputBuffer.Length -= count;
-            return true;
         }
     }
 }
