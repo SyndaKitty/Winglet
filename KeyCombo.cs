@@ -28,7 +28,7 @@
         Input.OnStroke += OnStroke;
     }
 
-    ~KeyCombo()
+    public void Unload()
     {
         Input.OnStroke -= OnStroke;
     }

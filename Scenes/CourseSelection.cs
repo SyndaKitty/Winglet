@@ -31,9 +31,6 @@ public class CourseSelection : Scene
         this.paper = paper ?? new();
         this.console = console ?? new();
         this.keyboard = keyboard ?? new KeyboardDisplay();
-
-        Input.OnStenoKeys += HandleKeyInput;
-        Input.OnTextTyped += HandleTextInput;
     }
 
     public void Load()
@@ -52,6 +49,9 @@ public class CourseSelection : Scene
                 courses.Add(c);
             }
         }
+
+        Input.OnStenoKeys += HandleKeyInput;
+        Input.OnTextTyped += HandleTextInput;
     }
 
     public void Unload() 

@@ -99,6 +99,7 @@ public static class Window
         {
             if (currentScene != null)
             {
+                Log.Trace(Tag, $"Unloading scene: {currentScene}");
                 currentScene.Unload();
             }
 
@@ -116,6 +117,7 @@ public static class Window
                 sceneStack.Pop();
             }
 
+            Log.Trace(Tag, $"Loading scene: {currentScene}");
             currentScene?.Load();
         }
         sceneActions.Clear();
