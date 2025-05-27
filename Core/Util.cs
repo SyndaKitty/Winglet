@@ -156,6 +156,13 @@ public static class Util
             return hash1 + (hash2 * 1566083941);
         }
     }
+
+    static Random? rand;
+    public static bool RandomChance(float chance)
+    {
+        if (rand == null) rand = new Random();
+        return rand.NextDouble() < chance;
+    }
 }
 
 public static class StringHelper

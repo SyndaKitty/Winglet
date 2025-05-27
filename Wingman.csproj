@@ -25,7 +25,7 @@
     <None Update="Resources\Courses\01_SingleSyllables.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Courses\02_BasicLeftHandSyllables copy.yaml">
+    <None Update="Resources\Courses\02_BasicLeftHandSyllables.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Courses\02_Tandem.yaml">
@@ -34,7 +34,7 @@
     <None Update="Resources\Courses\00_Keys.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Courses\03_SingleSyllableDBLWords copy.yaml">
+    <None Update="Resources\Courses\03_SingleSyllableDBLWords.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Courses\04_Test.yaml">

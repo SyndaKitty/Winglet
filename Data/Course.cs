@@ -34,7 +34,17 @@ public class CourseLesson
         var words = Prompts?.Split(" ", StringSplitOptions.RemoveEmptyEntries) ?? [];
         if (Order == LessonOrder.Random)
         {
-            Util.Shuffle(words);
+            // Easter egg, make "big slut" more likely
+            if (words.Contains("big") && words.Contains("slut") && Util.RandomChance(.25f))
+            {
+                var w = words.ToList();
+                int bigPos = w.IndexOf("big");
+                int slutPos = w.IndexOf("slut");
+                if (bigPos < words.Length - 1)
+                {
+                    (words[bigPos + 1], words[slutPos]) = (words[slutPos], words[bigPos + 1]);
+                }
+            }
         }
 
         return words.ToList();
