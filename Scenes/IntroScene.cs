@@ -2,6 +2,7 @@
 
 public class IntroScene : Scene
 {
+    SpriteAnimation? limes;
     float t;
     Image logo;
     Texture2D logoTex;
@@ -17,6 +18,8 @@ public class IntroScene : Scene
 
     public void Load()
     {
+        limes = new SpriteAnimation("limesdance.png", 35, 24);
+
         logo = Shared.LoadImage("Logo.png");
         logoTex = Raylib.LoadTextureFromImage(logo);
         logoShader = Raylib.LoadShader(null, "Resources/Shaders/fadein.glsl");
@@ -39,6 +42,8 @@ public class IntroScene : Scene
         {
             Window.SetScene(nextScene);
         }
+
+        limes?.Update();
     }
     
     public void Draw()
@@ -58,5 +63,12 @@ public class IntroScene : Scene
         }
         Raylib.EndShaderMode();
         Raylib.EndBlendMode();
+
+        if (limes != null)
+        {
+            x = Raylib.GetScreenWidth() - limes.Width;
+            y = Raylib.GetScreenHeight() - limes.Height;
+            limes?.Draw(x, y, Color.White);
+        }
     }
 }

@@ -26,34 +26,59 @@ public static class Shared
 
     public const int SlideSpeed = 15;
 
-    public static Dictionary<(string, int), Font> FontCache = [];
+    static Dictionary<(string, int), Font> fontCache = [];
     public static Font GetFont(string fontFile, int fontSize)
     {
         fontFile = $"Resources/Fonts/{fontFile}";
         var key = (fontFile, fontSize);
-        if (FontCache.ContainsKey(key))
+        if (fontCache.ContainsKey(key))
         {
-            return FontCache[key];
+            return fontCache[key];
         }
         var font = Raylib.LoadFontEx(fontFile, fontSize, null, 0);
-        FontCache[key] = font;
+        fontCache[key] = font;
         return font;
     }
 
-    public static Dictionary<string, Image> ImageCache = [];
+    static Dictionary<string, Image> imageCache = [];
     public static Image LoadImage(string filename)
     {
         filename = $"Resources/Images/{filename}";
 
-        if (ImageCache.ContainsKey(filename))
+        if (imageCache.ContainsKey(filename))
         {
-            return ImageCache[filename];
+            return imageCache[filename];
         }
 
         var image = Raylib.LoadImage(filename);
-        ImageCache.Add(filename, image);
+        imageCache.Add(filename, image);
 
         return image;
+    }
+
+    static Dictionary<string, Texture2D> textureCache = [];
+    public static Texture2D LoadTexture(string filename)
+    {
+        filename = $"Resources/Images/{filename}";
+
+        if (textureCache.ContainsKey(filename))
+        {
+            return textureCache[filename];
+        }
+
+        var tex = Raylib.LoadTexture(filename);
+        textureCache.Add(filename, tex);
+
+        return tex;
+    }
+
+    public static SpriteSheet LoadSpriteSheet(string filename, int frameCount)
+    {
+        return new SpriteSheet 
+        {
+            Texture = LoadTexture(filename),
+            FrameCount = frameCount
+        };
     }
 
     public static string GetApplicationPath()
