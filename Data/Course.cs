@@ -50,7 +50,7 @@ public class CourseLesson
     public override int GetHashCode()
     {
         // Used when logging lessons, to help ensure lesson content has not changed
-        return Util.ConsistentStringHash(Name) ^ Util.ConsistentStringHash(Prompts);
+        return Util.ConsistentStringHash(Prompts);
     }
 
     void ApplyEasterEggs(string[] words)

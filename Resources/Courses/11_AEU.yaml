@@ -1,0 +1,13 @@
+Name: Single syllable AEU words drill
+Description: 
+Lessons:
+  - Name: Single syllable AEU words drill
+    Type: words
+    Order: random
+    Prompts: snare snail strafe straight stair stale state jail jade square scrape scare scape scale skate spare spate space spade swear slate share shape shale shade vape veil vague vase safe sail sate glare glace glade glaze grape grail grate grace grade graze gape gait gaze drape dare date daze flair flail flate nape nail frail freight fair fail fate face fade their trail trait trace trade tape tail quare quail chair chase crepe crate craze care cape kale case blare blade blaze braille brace braid braze bare babe bail bait base bade plate place mail mate mace maid maize praise pair pail pate pace paid waif ware wabe wail wait wade labor late lace laid laze hair hail hate haze rare rail rate race raid air ape ail ace aid faze
+    RepeatCount: 1
+    Settings:
+      StrictSpaces: false
+      StrictSymbols: false
+      StrictCase: false
+      OnlyAdvanceWhenNextWordCorrect: true

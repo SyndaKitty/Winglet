@@ -49,6 +49,7 @@ public class DebugConsole
 
         var style = ImGui.GetStyle();
 
+        float frameMaxTagWidth = 0;
         float windowWidth = ImGui.GetCursorPos().X + ImGui.GetContentRegionAvail().X;
         float x = 0;
         for (int i = 0; i < tags.Count; i++)
@@ -56,6 +57,7 @@ public class DebugConsole
             ImGui.Checkbox(tags[i], ref tagToggles[i]);
             float buttonWidth = ImGui.GetItemRectSize().X;
             maxTagWidth = Math.Max(maxTagWidth, buttonWidth);
+            frameMaxTagWidth = Math.Max(frameMaxTagWidth, buttonWidth);
             x += buttonWidth + style.ItemSpacing.X;
             
             float nextButtonX = x + maxTagWidth + style.ItemSpacing.X;
@@ -68,6 +70,11 @@ public class DebugConsole
             {
                 x = 0;
             }
+        }
+        // If the window was resized, the maxTagWidth is incorrect
+        if (frameMaxTagWidth < maxTagWidth)
+        {
+            maxTagWidth = frameMaxTagWidth;
         }
 
         ImGui.Separator();
@@ -88,7 +95,6 @@ public class DebugConsole
             }
 
             Vector4 color;
-            
             
             ImGui.PushStyleColor(ImGuiCol.Text, GetLineColor(line.Severity));
             ImGui.TextWrapped(line.Text);
