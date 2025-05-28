@@ -34,17 +34,8 @@ public class CourseLesson
         var words = Prompts?.Split(" ", StringSplitOptions.RemoveEmptyEntries) ?? [];
         if (Order == LessonOrder.Random)
         {
-            // Easter egg, make "big slut" more likely
-            if (words.Contains("big") && words.Contains("slut") && Util.RandomChance(.25f))
-            {
-                var w = words.ToList();
-                int bigPos = w.IndexOf("big");
-                int slutPos = w.IndexOf("slut");
-                if (bigPos < words.Length - 1)
-                {
-                    (words[bigPos + 1], words[slutPos]) = (words[slutPos], words[bigPos + 1]);
-                }
-            }
+            Util.Shuffle(words);
+            ApplyEasterEggs(words);
         }
 
         return words.ToList();
@@ -54,6 +45,31 @@ public class CourseLesson
     {
         // Used when logging lessons, to help ensure lesson content has not changed
         return Util.ConsistentStringHash(Name) ^ Util.ConsistentStringHash(Prompts);
+    }
+
+    void ApplyEasterEggs(string[] words)
+    {
+        ApplyEasterEgg(words, .25f, "big", "slut");
+        ApplyEasterEgg(words, .40f, "head", "pat");
+        ApplyEasterEgg(words, 1f, "live", "laugh", "love");
+    }
+
+    void ApplyEasterEgg(string[] words, float chance, params string[] list)
+    {
+        if (list.Length == 0) return;
+
+        if (Util.RandomChance(chance) && list.All(w => words.Contains(w)))
+        {
+            var w = words.ToList();
+            int firstIndex = w.IndexOf(list[0]);
+
+            if (firstIndex >= words.Length - (list.Length - 1)) return;
+            for (int i = 1; i < list.Length; i++)
+            {
+                var idx = w.IndexOf(list[i]);
+                (words[firstIndex + i], words[idx]) = (words[idx], words[firstIndex + i]);
+            }
+        }
     }
 }
 

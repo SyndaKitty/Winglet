@@ -61,8 +61,6 @@ public class PracticeScene : Scene
         words = lesson.GetWords().Select(w => new Word {
             Target = w
         }).ToList();
-
-
     }
 
     public void Load() 
@@ -106,7 +104,7 @@ public class PracticeScene : Scene
         paper.Draw(cursor);
 
         float keyboardWidth = 600f;
-        keyboard.Draw(new Vector2(GetScreenWidth() / 2 - keyboardWidth / 2, padding), keyboardWidth);
+        keyboard.Draw(new Vector2(GetScreenWidth() / 2 - keyboardWidth / 2 - 15f, 30f), keyboardWidth);
 
         Color timerColor = Shared.TextColor;
         if (timerRunning)
@@ -141,9 +139,9 @@ public class PracticeScene : Scene
         if (words.Count == 0) return;
 
         const int vPadding = 10;
-        const int hPadding = 160;
+        const int hPadding = 240;
         
-        int rightMost = width - hPadding;
+        int rightMost = width - hPadding * 2;
         leftMost += hPadding;
 
         // Calculate word positions ahead of time, relative to first word
@@ -172,7 +170,7 @@ public class PracticeScene : Scene
                 int inputWidth = Util.GetTextWidth(iWord, primaryFont);
                 int textWidth = Math.Max(targetWidth, inputWidth) + fontWidth;
 
-                if (cursor.X + textWidth > width - hPadding * 2)
+                if (cursor.X + textWidth > rightMost)
                 {
                     cursor.Y += (primaryFont.BaseSize + vPadding) * 2;
                     cursor.X = 0;
@@ -185,7 +183,7 @@ public class PracticeScene : Scene
 
         // Adjust positions so that current word is centered, and words are aligned within block
         int yCenter = GetScreenHeight() / 2 - primaryFont.BaseSize * 2;
-        Vector2 offset = new(leftMost + hPadding, yCenter - wordInfo[currentWordIndex].pos.Y);
+        Vector2 offset = new(leftMost, yCenter - wordInfo[currentWordIndex].pos.Y);
 
         float rawY = offset.Y;
         if (Shared.UserSettings.SmoothScroll)
@@ -203,7 +201,7 @@ public class PracticeScene : Scene
             var info = wordInfo[i];
             wordInfo[i] = (info.pos + offset, info.word, info.topWord, info.bottomWord);
         }
-        
+
         // Draw words
         foreach (var info in wordInfo)
         {
@@ -239,6 +237,17 @@ public class PracticeScene : Scene
             pos.Y += primaryFont.BaseSize;
             var textColor = Shared.TextColor;
             textColor.A = alpha;
+
+            // Debug easter eggs
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                string[] specialWords = ["big", "slut", "head", "pat", "live", "laugh", "love"];
+                if (specialWords.Contains(info.bottomWord))
+                {
+                    textColor.G = 255;
+                }
+            }
+
             Util.DrawText(primaryFont, info.bottomWord, pos, textColor);
         }
     }
