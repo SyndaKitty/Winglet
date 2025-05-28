@@ -163,6 +163,29 @@ public static class Util
         if (rand == null) rand = new Random();
         return rand.NextDouble() < chance;
     }
+
+    public static float Map(float value, float fromStart, float fromEnd, float toStart, float toEnd)
+    {
+        float t = InvLerp(fromStart, fromEnd, value);
+        t = Clamp01(t);
+        return Lerp(toStart, toEnd, t);
+    }
+
+    public static Color LerpColor(Color a, Color b, float t)
+    {
+        t = Clamp01(t);
+
+        var av = new Vector3(a.R/255f, a.G/255f, a.B / 255f);
+        var bv = new Vector3(b.R / 255f, b.G / 255f, b.B / 255f);
+        var lerped = Vector3.Lerp(av, bv, t);
+
+        return new Color(lerped.X, lerped.Y, lerped.Z);
+    }
+
+    public static float Clamp01(float t)
+    {
+        return Math.Max(0, Math.Min(1, t));
+    }
 }
 
 public static class StringHelper

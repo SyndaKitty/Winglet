@@ -111,7 +111,7 @@ public class PracticeScene : Scene
         {
             timerColor = Shared.AltTextColor;
         }
-        
+
         // Draw WPM
         cursor.X = padding;
         cursor.Y = GetScreenHeight() - primaryFont.BaseSize - padding * 3;
@@ -123,6 +123,19 @@ public class PracticeScene : Scene
         cursor.Y -= primaryFont.BaseSize + padding;
         Util.DrawText(primaryFont, timerText, cursor, timerColor);
         
+        // Draw accuracy
+        float accuracy = 1f;
+        if (maxWordIndex > 0)
+        {
+            accuracy = 1f - (float)words.Count(x => x.AnyError) / maxWordIndex;
+        }
+        string accuracyString = FormatAccuracy(accuracy);
+        cursor.X = padding;
+        cursor.Y -= primaryFont.BaseSize + padding;
+        float redness = Util.InvLerp(.8f, .97f, accuracy);
+        Color accuracyColor = Util.LerpColor(Shared.ErrTextColor, Shared.AltTextColor, redness);
+        Util.DrawText(primaryFont, accuracyString, cursor, accuracyColor);
+
         // Draw progress bar
         const int progressBarHeight = 20;
         float progressPercent = (float)currentWordIndex / words.Count;
@@ -387,8 +400,10 @@ public class PracticeScene : Scene
     {
         int finalWPM = wpm.GetWPM(true);
         int mistakeCount = words.Count(x => x.AnyError);
-        
-        Log.Info(Tag, $"Lesson complete. WPM={finalWPM} Mistakes:{mistakeCount}");
+
+        float accuracyPercent = 1f - (float)mistakeCount / words.Count;
+        int accuracy = (int)MathF.Round(accuracyPercent * 100f);
+        Log.Info(Tag, $"Lesson complete. WPM={finalWPM} Mistakes:{mistakeCount} Accuracy:{accuracy}%");
         Shared.RecordLessonResult(lesson, finalWPM, mistakeCount);
 
         timerRunning = false;
@@ -417,7 +432,7 @@ public class PracticeScene : Scene
         int minutes = (int)(time / 60);
         int seconds = (int)(time % 60);
 
-        return $"{minutes,3:D1}:{seconds:D2}";
+        return $" {minutes,3:D1}:{seconds:D2}";
     }
 
     string FormatWpm(int wpm)
@@ -427,6 +442,12 @@ public class PracticeScene : Scene
             wpm = 999;
         }
         return $"{wpm,3} WPM";
+    }
+
+    string FormatAccuracy(float accuracy)
+    {
+        int acc = (int)Math.Round(accuracy * 100);
+        return $"   {acc,2}%";
     }
 
     public void Update()

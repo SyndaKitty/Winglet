@@ -1,0 +1,13 @@
+Name: Single syllable zvj drill
+Description: 
+Lessons:
+  - Name: Chapter test
+    Type: words
+    Order: random
+    Prompts: jar jab jag jazz job jog jot jib jig gel jet jug jut var val vat vir vit vis vid ver vet zip zig zit
+    RepeatCount: 3
+    Settings:
+      StrictSpaces: false
+      StrictSymbols: false
+      StrictCase: false
+      OnlyAdvanceWhenNextWordCorrect: true

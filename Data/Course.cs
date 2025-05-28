@@ -27,18 +27,24 @@ public class CourseLesson
     public LessonType Type { get; set; }
     public LessonOrder Order { get; set; }
     public string? Prompts { get; set; }
+    public int RepeatCount { get; set; } = 1;
     public LessonSettings Settings { get; set; }
 
     public List<string> GetWords()
     {
-        var words = Prompts?.Split(" ", StringSplitOptions.RemoveEmptyEntries) ?? [];
-        if (Order == LessonOrder.Random)
+        List<string> finalList = [];
+        for(int i = 0; i < RepeatCount; i++)
         {
-            Util.Shuffle(words);
-            ApplyEasterEggs(words);
+            var words = Prompts?.Split(" ", StringSplitOptions.RemoveEmptyEntries) ?? [];
+            if (Order == LessonOrder.Random)
+            {
+                Util.Shuffle(words);
+                ApplyEasterEggs(words);
+            }
+            finalList.AddRange(words);
         }
 
-        return words.ToList();
+        return finalList;
     }
 
     public override int GetHashCode()
