@@ -19,16 +19,17 @@ public static class Shared
 
     public static Color WarningTextColor = new Color(238, 242, 125);
 
-    public static string PrimaryFontFile = "Resources/Hack-Regular.ttf";
-    public static string SecondaryFontFile = "Resources/Hack-Regular.ttf";
+    public static string PrimaryFontFile = "Hack-Regular.ttf";
+    public static string SecondaryFontFile = "Hack-Regular.ttf";
 
-    public static Dictionary<(string, int), Font> FontCache = [];
     public static UserSettings UserSettings = new();
 
     public const int SlideSpeed = 15;
 
+    public static Dictionary<(string, int), Font> FontCache = [];
     public static Font GetFont(string fontFile, int fontSize)
     {
+        fontFile = $"Resources/Fonts/{fontFile}";
         var key = (fontFile, fontSize);
         if (FontCache.ContainsKey(key))
         {
@@ -37,6 +38,22 @@ public static class Shared
         var font = Raylib.LoadFontEx(fontFile, fontSize, null, 0);
         FontCache[key] = font;
         return font;
+    }
+
+    public static Dictionary<string, Image> ImageCache = [];
+    public static Image LoadImage(string filename)
+    {
+        filename = $"Resources/Images/{filename}";
+
+        if (ImageCache.ContainsKey(filename))
+        {
+            return ImageCache[filename];
+        }
+
+        var image = Raylib.LoadImage(filename);
+        ImageCache.Add(filename, image);
+
+        return image;
     }
 
     public static string GetApplicationPath()

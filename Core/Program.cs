@@ -12,6 +12,7 @@ Window.Create(new WindowSettings {
     MinSize = (400, 300),
     Resizable = true,
     VSync = true,
+    MSAA = true
 });
 
 // Render a single frame to get to blank screen ASAP
@@ -25,7 +26,9 @@ Input.SetServer(server);
 
 _ = Task.Run(server.Connect);
 
-Window.Run(new CourseSelection(server, console, null, null));
+var courseSelection = new CourseSelection(server, console, null, null);
+Window.Run(new IntroScene(courseSelection));
+//Window.Run();
 //Window.Run(new PracticeScene(Course.Load("Resources/Courses/00_Introductions.yaml")?.Lessons[0]));
 
 Log.Stop();

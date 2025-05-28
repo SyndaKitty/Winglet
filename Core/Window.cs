@@ -40,7 +40,7 @@ public static class Window
     public static void Run(Scene startScene)
     {
         rlImGui.SetupUserFonts += (ImGuiIOPtr ptr) => {
-            var fontPtr = ptr.Fonts.AddFontFromFileTTF("Resources/Hack-Regular.ttf", 14);
+            var fontPtr = ptr.Fonts.AddFontFromFileTTF("Resources/Fonts/Hack-Regular.ttf", 14);
             unsafe
             {
                 ptr.NativePtr->FontDefault = fontPtr;
