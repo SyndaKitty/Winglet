@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using Raylib_cs;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Tomlyn;
 
@@ -189,5 +190,49 @@ public static class Shared
         string logLine = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss},Lesson: {lesson.Name},WPM: {wpm},Mistakes: {mistakes},Hash: {lesson.GetHashCode()}\n";
 
         File.AppendAllText(resultFilePath, logLine);
+    }
+
+    static string[] gayColorsHex = ["E50000", "FF8D00", "FFEE00", "028121", "004CFF", "760088"];
+    static Color[]? _gayColors;
+    public static Color[] GayColors { 
+        get 
+        { 
+            if (_gayColors == null)
+            {
+                _gayColors = gayColorsHex.Select(Util.HexColor).ToArray();
+            }
+
+            return _gayColors;
+        } 
+    }
+
+    static string[] rainbowColorsHex = ["E50000", "FF8D00", "FFEE00", "028121", "004CFF", "5541AD", "8E018E"];
+    static Color[]? _rainbowColors;
+    public static Color[] RainbowColors
+    {
+        get
+        {
+            if (_rainbowColors == null)
+            {
+                _rainbowColors = rainbowColorsHex.Select(Util.HexColor).ToArray();
+            }
+
+            return _rainbowColors;
+        }
+    }
+
+    static string[] transColorsHex = ["73D7EE", "FFAFC7", "FFFFFF", "FFAFC7", "73D7EE"];
+    static Color[]? _transColors;
+    public static Color[] TransColors
+    {
+        get
+        {
+            if (_transColors == null)
+            {
+                _transColors = transColorsHex.Select(Util.HexColor).ToArray();
+            }
+
+            return _transColors;
+        }
     }
 }

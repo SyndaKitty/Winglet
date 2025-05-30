@@ -175,17 +175,129 @@ public static class Util
     {
         t = Clamp01(t);
 
-        var av = new Vector3(a.R/255f, a.G/255f, a.B / 255f);
-        var bv = new Vector3(b.R / 255f, b.G / 255f, b.B / 255f);
+        var av = ToVector(a);
+        var bv = ToVector(b);
         var lerped = Vector3.Lerp(av, bv, t);
 
         return new Color(lerped.X, lerped.Y, lerped.Z);
+    }
+
+    public static Vector3 ToVector(Color c)
+    {
+        return new Vector3(c.R / 255f, c.G / 255f, c.B / 255f);
     }
 
     public static float Clamp01(float t)
     {
         return Math.Max(0, Math.Min(1, t));
     }
+
+    public static float Clamp(float a, float b, float v)
+    {
+        var from = Math.Min(a, b);
+        var to = Math.Max(a, b);
+        return Math.Max(from, Math.Min(to, v));
+    }
+
+    public static Color HexColor(string hex)
+    {
+        string originalHex = hex;
+        hex = hex.Replace("#", "");
+        if (hex.Length != 6 && hex.Length != 8)
+        {
+            Log.Error(Tag, $"Invalid hexcode length: '{originalHex}' with length of {hex.Length}. Must be 6 or 8 characters");
+        }
+
+        List<byte> colorVals = [];
+        try
+        {
+            for (int i = 0; i < hex.Length; i += 2)
+            {
+                colorVals.Add(Convert.FromHexString(hex.Substring(i, 2)).First());
+            }    
+        }
+        catch
+        {
+            Log.Error(Tag, $"Invalid hexcode: {originalHex}");
+        }
+
+        if (colorVals.Count == 3)
+        {
+            return new Color(colorVals[0], colorVals[1], colorVals[2]);
+        }
+        return new Color(colorVals[0], colorVals[1], colorVals[2], colorVals[3]);
+    }
+
+
+    // Note: Something is wrong about this implementation
+    /// <summary>
+    /// Convert RGB Color to normalized HSV Vector
+    /// </summary>
+    /// <param name="c">Color with RGB values</param>
+    /// <returns>Normalized HSV vector</returns>
+    //public static Vector3 ColorToHSV(Color c)
+    //{
+    //    // https://math.stackexchange.com/questions/556341/rgb-to-hsv-color-conversion-algorithm
+    //    float r = c.R / 255f;
+    //    float g = c.G / 255f;
+    //    float b = c.B / 255f;
+    //    float maxC = Math.Max(r, Math.Max(g, b));
+    //    float minC = Math.Min(r, Math.Min(g, b));
+
+    //    if (minC == maxC)
+    //    {
+    //        return new(0, 0, maxC);
+    //    }
+    //    float delta = maxC - minC;
+    //    float rc = (maxC - r) / delta;
+    //    float gc = (maxC - g) / delta;
+    //    float bc = (maxC - b) / delta;
+
+    //    float H; // [0,1]
+    //    if (r == maxC) H = 0f + bc - gc;
+    //    if (g == maxC) H = 2f + rc - bc;
+    //    else H = 4f + gc - rc;
+
+    //    H = (H / 6f) % 1f;
+
+    //    float S = (maxC - minC) / maxC;
+    //    float V = maxC;
+
+    //    return new(H, S, V);
+    //}
+
+    // https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
+    //public static Color HSVToColor(Vector3 hsv)
+    //{
+    //    (float h, float s, float v) = (hsv.X, hsv.Y, hsv.Z);
+    //    if (s < 0) new Color(v, v, v);
+
+    //    h *= 360f;
+    //    float hh = h;
+    //    if (hh >= 360f) hh = 0;
+    //    hh /= 60f;
+    //    long i = (long)hh;
+    //    float ff = hh - i;
+    //    float p = v * (1f - s);
+    //    float q = v * (1f - s * ff);
+    //    float t = v * (1f - s * (1f - ff));
+
+    //    switch (i)
+    //    {
+    //        case 0:
+    //            return new Color(v, t, p);
+    //        case 1:
+    //            return new Color(q, v, p);
+    //        case 2:
+    //            return new Color(p, v, t);
+    //        case 3:     
+    //            return new Color(p, q, v);
+    //        case 4:
+    //            return new Color(t, p, v);
+    //        default:
+    //            return new Color(v, p, q);
+    //    }
+    //}
 }
 
 public static class StringHelper

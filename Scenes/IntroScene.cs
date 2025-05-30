@@ -2,36 +2,40 @@
 
 public class IntroScene : Scene
 {
-    SpriteAnimation? limes;
+    SpriteAnimation limes;
     float t;
-    Image logo;
-    Texture2D logoTex;
-    Shader logoShader;
-    int texLocation;
-    int tLocation;
+    //Image logo;
+    //Texture2D logoTex;
+    //Shader logoShader;
+    //int texLocation;
+    //int tLocation;
     Scene nextScene;
+    Logo logo;
 
     public IntroScene(Scene nextScene)
     {
         this.nextScene = nextScene;
+        logo = new();
+        limes = new SpriteAnimation("limesdance.png", 35, 24);
     }
 
     public void Load()
     {
-        limes = new SpriteAnimation("limesdance.png", 35, 24);
 
-        logo = Shared.LoadImage("Logo.png");
-        logoTex = Raylib.LoadTextureFromImage(logo);
-        logoShader = Raylib.LoadShader(null, "Resources/Shaders/fadein.glsl");
-        texLocation = Raylib.GetShaderLocation(logoShader, "texture0");
-        tLocation = Raylib.GetShaderLocation(logoShader, "t");
+        //logo = Shared.LoadImage("Logo.png");
+        //logoTex = Raylib.LoadTextureFromImage(logo);
+        //logoShader = Raylib.LoadShader(null, "Resources/Shaders/fadein.glsl");
+        //texLocation = Raylib.GetShaderLocation(logoShader, "texture0");
+        //tLocation = Raylib.GetShaderLocation(logoShader, "t");
+        //Raylib.SetTextureFilter(logoTex, TextureFilter.Trilinear);
 
-        Raylib.SetTextureFilter(logoTex, TextureFilter.Trilinear);
+        limes.Load();
+        logo.Load();
     }
     
     public void Unload() 
     {
-        Raylib.UnloadShader(logoShader);
+        //Raylib.UnloadShader(logoShader);
     }
 
     public void Update()
@@ -40,20 +44,24 @@ public class IntroScene : Scene
 
         if (t > 3.5f)
         {
-            Window.SetScene(nextScene);
+            //Window.SetScene(nextScene);
         }
 
-        limes?.Update();
+        logo.Update();
+        limes.Update();
     }
     
     public void Draw()
     {
+        Raylib.ClearBackground(Shared.BackgroundColor);
+        
         float w = Raylib.GetScreenWidth();
         float h = Raylib.GetScreenHeight();
-        float x = (w - logoTex.Width) *.5f;
-        float y = (h - logoTex.Height) * .5f;
+        float x = (w - logo.Width) *.5f;
+        float y = (h - logo.Height) * .5f;
+        logo.Draw(new(x, y));
+        /*
 
-        Raylib.ClearBackground(Shared.BackgroundColor);
         Raylib.BeginBlendMode(BlendMode.Alpha);
         Raylib.BeginShaderMode(logoShader);
         {
@@ -63,12 +71,10 @@ public class IntroScene : Scene
         }
         Raylib.EndShaderMode();
         Raylib.EndBlendMode();
+        */
 
-        if (limes != null)
-        {
-            x = Raylib.GetScreenWidth() - limes.Width;
-            y = Raylib.GetScreenHeight() - limes.Height;
-            limes?.Draw(x, y, Color.White);
-        }
+        x = Raylib.GetScreenWidth() - limes.Width;
+        y = Raylib.GetScreenHeight() - limes.Height;
+        limes.Draw(x, y, Color.White);
     }
 }
