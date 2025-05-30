@@ -50,17 +50,10 @@ public class Logo
     public void Update()
     {
         t += Raylib.GetFrameTime();
-
-        if (Raylib.IsKeyPressed(KeyboardKey.Space))
-        {
-            t = 0;
-        }
     }
 
     public void Draw(Vector2 pos)
     {
-        //Raylib.BeginBlendMode(BlendMode.Alpha);
-
         // Wing/base
         for (int i = 0; i < wings.Count; i++)
         {
@@ -72,7 +65,6 @@ public class Logo
             Raylib.DrawTexture(subImage, (int)pos.X, (int)pos.Y, Shared.TransColors[i]);
             Raylib.EndShaderMode();
         }
-
 
         // Letters
         for (int i = 0; i < letters.Count; i++)

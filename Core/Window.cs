@@ -50,6 +50,8 @@ public static class Window
         rlImGui.Setup(true);
         //ImGuiTheme.SetupImGuiStyle();
 
+        InitAudioDevice();
+
         SetScene(startScene);
 
         while (!WindowShouldClose())

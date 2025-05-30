@@ -28,15 +28,17 @@ public static class Shared
     public const int SlideSpeed = 15;
 
     static Dictionary<(string, int), Font> fontCache = [];
-    public static Font GetFont(string fontFile, int fontSize)
+    public static Font GetFont(string filename, int fontSize)
     {
-        fontFile = $"Resources/Fonts/{fontFile}";
-        var key = (fontFile, fontSize);
+        filename = $"Resources/Fonts/{filename}";
+        var key = (filename, fontSize);
         if (fontCache.ContainsKey(key))
         {
             return fontCache[key];
         }
-        var font = Raylib.LoadFontEx(fontFile, fontSize, null, 0);
+
+        Log.Info(Tag, $"Loading font {filename}");
+        var font = Raylib.LoadFontEx(filename, fontSize, null, 0);
         fontCache[key] = font;
         return font;
     }
@@ -45,12 +47,13 @@ public static class Shared
     public static Image LoadImage(string filename)
     {
         filename = $"Resources/Images/{filename}";
-
+        
         if (imageCache.ContainsKey(filename))
         {
             return imageCache[filename];
         }
 
+        Log.Info(Tag, $"Loading image {filename}");
         var image = Raylib.LoadImage(filename);
         imageCache.Add(filename, image);
 
@@ -67,11 +70,30 @@ public static class Shared
             return textureCache[filename];
         }
 
+        Log.Info(Tag, $"Loading texture {filename}");
         var tex = Raylib.LoadTexture(filename);
         textureCache.Add(filename, tex);
 
         return tex;
     }
+
+    static Dictionary<string, Sound> soundCache = [];
+    public static Sound LoadSound(string filename)
+    {
+        filename = $"Resources/Sounds/{filename}";
+
+        if (soundCache.ContainsKey(filename))
+        {
+            return soundCache[filename];
+        }
+        Log.Info(Tag, $"Loading sound {filename}");
+        
+        var sound = Raylib.LoadSound(filename);
+        soundCache.Add(filename, sound);
+
+        return sound;
+    }
+
 
     public static SpriteSheet LoadSpriteSheet(string filename, int frameCount)
     {

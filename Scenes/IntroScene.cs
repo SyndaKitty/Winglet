@@ -4,53 +4,52 @@ public class IntroScene : Scene
 {
     SpriteAnimation limes;
     float t;
-    //Image logo;
-    //Texture2D logoTex;
-    //Shader logoShader;
-    //int texLocation;
-    //int tLocation;
     Scene nextScene;
     Logo logo;
+    PloverServer server;
 
-    public IntroScene(Scene nextScene)
+    public IntroScene(Scene nextScene, PloverServer server)
     {
         this.nextScene = nextScene;
+        this.server = server;
         logo = new();
         limes = new SpriteAnimation("limesdance.png", 35, 24);
     }
 
     public void Load()
     {
-
-        //logo = Shared.LoadImage("Logo.png");
-        //logoTex = Raylib.LoadTextureFromImage(logo);
-        //logoShader = Raylib.LoadShader(null, "Resources/Shaders/fadein.glsl");
-        //texLocation = Raylib.GetShaderLocation(logoShader, "texture0");
-        //tLocation = Raylib.GetShaderLocation(logoShader, "t");
-        //Raylib.SetTextureFilter(logoTex, TextureFilter.Trilinear);
-
         limes.Load();
         logo.Load();
+        Input.OnTextTyped += OnTextTyped;
+        Input.OnStroke += OnStroke;
     }
     
     public void Unload() 
     {
-        //Raylib.UnloadShader(logoShader);
+        logo.Unload();
+        Input.OnTextTyped -= OnTextTyped;
+        Input.OnStroke -= OnStroke;
     }
 
     public void Update()
     {
-        t += Raylib.GetFrameTime() * 1.5f;
+        t += Raylib.GetFrameTime();
 
-        if (t > 3.5f)
+        if (t > 3f)
         {
-            //Window.SetScene(nextScene);
+            End();
         }
 
         logo.Update();
         limes.Update();
+        server.DispatchMessages();
     }
-    
+
+    void End()
+    {
+        Window.SetScene(nextScene);
+    }
+
     public void Draw()
     {
         Raylib.ClearBackground(Shared.BackgroundColor);
@@ -60,21 +59,19 @@ public class IntroScene : Scene
         float x = (w - logo.Width) *.5f;
         float y = (h - logo.Height) * .5f;
         logo.Draw(new(x, y));
-        /*
-
-        Raylib.BeginBlendMode(BlendMode.Alpha);
-        Raylib.BeginShaderMode(logoShader);
-        {
-            Raylib.SetShaderValueTexture(logoShader, texLocation, logoTex);
-            Raylib.SetShaderValue(logoShader, tLocation, t, ShaderUniformDataType.Float);
-            Raylib.DrawTexture(logoTex, (int)x, (int)y, Color.White);
-        }
-        Raylib.EndShaderMode();
-        Raylib.EndBlendMode();
-        */
 
         x = Raylib.GetScreenWidth() - limes.Width;
         y = Raylib.GetScreenHeight() - limes.Height;
         limes.Draw(x, y, Color.White);
+    }
+
+    void OnTextTyped(string text)
+    {
+        End();
+    }
+
+    void OnStroke(string stroke)
+    {
+        End();
     }
 }

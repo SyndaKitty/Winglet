@@ -27,7 +27,7 @@ Input.SetServer(server);
 _ = Task.Run(server.Connect);
 
 var courseSelection = new CourseSelection(server, console, null, null);
-Window.Run(new IntroScene(courseSelection));
+Window.Run(new IntroScene(courseSelection, server));
 //Window.Run();
 //Window.Run(new PracticeScene(Course.Load("Resources/Courses/00_Introductions.yaml")?.Lessons[0]));
 
