@@ -9,7 +9,7 @@ public class CourseSelection : Scene
 
     Font primaryFont;
     List<Course> courses = [];
-    int selectedIndex = 2;
+    int selectedIndex = 0;
 
     Color standardColor = Shared.TextColor;
     Color selectedColor = Shared.AltTextColor;
@@ -21,6 +21,10 @@ public class CourseSelection : Scene
     Paper paper;
     DebugConsole console;
     KeyboardDisplay keyboard;
+    
+    // Scores
+    ScoreGraph? graph;
+    List<LessonResult> scores;
 
     bool expectNewline;
     bool gotNewline;
@@ -49,6 +53,19 @@ public class CourseSelection : Scene
                 courses.Add(c);
             }
         }
+
+        Log.Info(Tag, "Loading score records");
+        scores = LessonResult.Deserialize(File.ReadAllText(Shared.ResultFilePath));
+
+        if (scores.Count > 0)
+        {
+            var lastCourseDone = courses.FirstOrDefault(x => scores.First().LessonName == x.Lessons[0].Name);
+            if (lastCourseDone != null)
+            {
+                selectedIndex = courses.IndexOf(lastCourseDone);
+            }
+        }
+        SelectNewCourse();
 
         Input.OnStenoKeys += HandleKeyInput;
         Input.OnTextTyped += HandleTextInput;
@@ -96,6 +113,10 @@ public class CourseSelection : Scene
         paper.Draw(new Vector2(width - paper.Width, 0));
         console.Draw();
         keyboard.Draw(new(width * .3f, 20f), width * .3f);
+
+        int x = Raylib.GetScreenWidth() / 2;
+        int y = Raylib.GetScreenHeight() / 2;
+        graph?.Draw(new(x, y), new(x, y));
     }
 
     void KeyPress(string key)
@@ -107,6 +128,7 @@ public class CourseSelection : Scene
             if (prevIndex != selectedIndex)
             {
                 yOffset += lineGap;
+                SelectNewCourse();
             }
         }
 
@@ -117,8 +139,15 @@ public class CourseSelection : Scene
             if (prevIndex != selectedIndex)
             {
                 yOffset -= lineGap;
+                SelectNewCourse();
             }
         }
+    }
+
+    void SelectNewCourse()
+    {
+        graph = new ScoreGraph(scores, courses[selectedIndex].Lessons[0]);
+        graph.Load();
     }
 
     void HandleKeyInput(List<string> keys)

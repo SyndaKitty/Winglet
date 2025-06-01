@@ -166,6 +166,8 @@ public static class Util
 
     public static float Map(float value, float fromStart, float fromEnd, float toStart, float toEnd)
     {
+        if (fromStart == fromEnd) return Lerp(toStart, toEnd, 0.5f);
+
         float t = InvLerp(fromStart, fromEnd, value);
         t = Clamp01(t);
         return Lerp(toStart, toEnd, t);

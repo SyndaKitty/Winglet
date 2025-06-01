@@ -1,4 +1,5 @@
 ﻿using Raylib_cs;
+using System.Diagnostics;
 
 public class IntroScene : Scene
 {
@@ -33,14 +34,23 @@ public class IntroScene : Scene
 
     public void Update()
     {
-        t += Raylib.GetFrameTime();
+        if (!Debugger.IsAttached || !Raylib.IsKeyDown(KeyboardKey.Space))
+        {
+            t += Raylib.GetFrameTime();
+        }
 
         if (t > 3f)
         {
             End();
         }
 
-        logo.Update();
+
+        if (Debugger.IsAttached && Raylib.IsKeyReleased(KeyboardKey.Space))
+        {
+            t = 0;
+        }
+
+        logo.Update(t);
         limes.Update();
         server.DispatchMessages();
     }

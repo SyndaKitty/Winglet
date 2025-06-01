@@ -57,7 +57,12 @@ public class CourseLesson
     {
         ApplyEasterEgg(words, .25f, "big", "slut");
         ApplyEasterEgg(words, .40f, "head", "pat");
-        ApplyEasterEgg(words, 1f, "live", "laugh", "love");
+        ApplyEasterEgg(words, .3f, "live", "laugh", "love");
+        ApplyEasterEgg(words, .7f, "good", "girl");
+        ApplyEasterEgg(words, .7f, "good", "boy");
+        ApplyEasterEgg(words, .5f, "fem", "boy");
+        ApplyEasterEgg(words, 1f, "trans", "rights");
+        ApplyEasterEgg(words, .5f, "egg", "crack");
     }
 
     void ApplyEasterEgg(string[] words, float chance, params string[] list)

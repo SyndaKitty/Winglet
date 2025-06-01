@@ -47,9 +47,9 @@ public class Logo
         Raylib.UnloadShader(logoShader);
     }
 
-    public void Update()
+    public void Update(float t)
     {
-        t += Raylib.GetFrameTime();
+        this.t = t;
     }
 
     public void Draw(Vector2 pos)
@@ -66,6 +66,9 @@ public class Logo
             Raylib.EndShaderMode();
         }
 
+        // Animation math
+        // https://www.desmos.com/calculator/m9g7gfjcwr
+
         // Letters
         for (int i = 0; i < letters.Count; i++)
         {
@@ -75,7 +78,6 @@ public class Logo
             var white = Color.White;
             var rainbow = Shared.RainbowColors[i];
             var brightRainbow = Util.LerpColor(rainbow, Color.White, .4f);
-
 
             float l = .5f;
             float curve = -4f / l / l * (subT - l / 2f) * (subT - l / 2f) + 1;
@@ -99,7 +101,5 @@ public class Logo
             Raylib.DrawTexture(subImage, (int)pos.X, (int)(pos.Y - curve * 40f), c);
             Raylib.EndShaderMode();
         }
-
-        //Raylib.EndBlendMode();
     }
 }

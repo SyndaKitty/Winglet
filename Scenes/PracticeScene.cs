@@ -103,7 +103,7 @@ public class PracticeScene : Scene
         cursor.Y = 0;
         paper.Draw(cursor);
 
-        float keyboardWidth = 600f;
+        float keyboardWidth = 450f;
         keyboard.Draw(new Vector2(GetScreenWidth() / 2 - keyboardWidth / 2 - 15f, 30f), keyboardWidth);
 
         Color timerColor = Shared.TextColor;
@@ -404,7 +404,16 @@ public class PracticeScene : Scene
         float accuracyPercent = 1f - (float)mistakeCount / words.Count;
         int accuracy = (int)MathF.Round(accuracyPercent * 100f);
         Log.Info(Tag, $"Lesson complete. WPM={finalWPM} Mistakes:{mistakeCount} Accuracy:{accuracy}%");
-        Shared.RecordLessonResult(lesson, finalWPM, mistakeCount);
+
+        var res = new LessonResult 
+        {
+            WPM = finalWPM,
+            Mistakes = mistakeCount,
+            LessonName = lesson.Name ?? "",
+            Time = DateTime.Now,
+            LessonHash = lesson.GetHashCode()
+        };
+        File.AppendAllText(Shared.ResultFilePath, res.Serialize());
 
         timerRunning = false;
         done = true;

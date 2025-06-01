@@ -1,6 +1,4 @@
-﻿using ImGuiNET;
-using Raylib_cs;
-using System.Runtime.CompilerServices;
+﻿using Raylib_cs;
 using System.Runtime.InteropServices;
 using Tomlyn;
 
@@ -206,13 +204,7 @@ public static class Shared
         File.Move(path, newPath, true);
     }
 
-    public static void RecordLessonResult(CourseLesson lesson, int wpm, int mistakes)
-    {
-        string resultFilePath = Path.Combine(GetApplicationPath(), "ResultLog.txt");
-        string logLine = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss},Lesson: {lesson.Name},WPM: {wpm},Mistakes: {mistakes},Hash: {lesson.GetHashCode()}\n";
-
-        File.AppendAllText(resultFilePath, logLine);
-    }
+    public static string ResultFilePath => Path.Combine(GetApplicationPath(), "ResultLog.txt");
 
     static string[] gayColorsHex = ["E50000", "FF8D00", "FFEE00", "028121", "004CFF", "760088"];
     static Color[]? _gayColors;
@@ -228,7 +220,8 @@ public static class Shared
         } 
     }
 
-    static string[] rainbowColorsHex = ["E50000", "FF8D00", "FFEE00", "028121", "004CFF", "5541AD", "8E018E"];
+    //static string[] rainbowColorsHex = ["E50000", "FF8D00", "FFEE00", "028121", "004CFF", "5541AD", "8E018E"];
+    static string[] rainbowColorsHex = ["FAB7DA", "F0C0AA", "F0E78B", "A1EBCE", "A4EAF0", "BBC1F2", "B8A5E0"];
     static Color[]? _rainbowColors;
     public static Color[] RainbowColors
     {
