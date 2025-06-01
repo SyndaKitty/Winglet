@@ -1,0 +1,13 @@
+Name: Single syllable AE AEU AOE words drill
+Description: 
+Lessons:
+  - Name: Single syllable AE AEU AOE words drill
+    Type: words
+    Order: random
+    Prompts: stair steel sheer veil seer sail grate gait deer flair fair feet tare tail cheep bare bail beet meet maid maize pair pail piece ware here heel reel reed ail eight stare steal shear vale sear sale great gate dear flare fare feat tear tale cheap bread bear bale beat male meat made maze pear pale peace wear hear heal real read ale ate
+    RepeatCount: 1
+    Settings:
+      StrictSpaces: false
+      StrictSymbols: false
+      StrictCase: false
+      OnlyAdvanceWhenNextWordCorrect: true

@@ -1,0 +1,13 @@
+Name: Single syllable AO words drill
+Description: 
+Lessons:
+  - Name: Single syllable AO words drill
+    Type: words
+    Order: random
+    Prompts: snoop snoot snooze stoop stool stood scoop school scoot spoof spool swoop sloop shoot soar soot gloop goof goop goose good droop drool door doop doot dood floof floor flood noob noose fool foot food troop tool toot toad choose coop cool bloop blood brood boar bool boot booze moor moot moose mood proof poof poor poop pool woof woop wool woot wood loaf loop loot loose load hoof hoop hoot hood roof root road oof oar ooze
+    RepeatCount: 1
+    Settings:
+      StrictSpaces: false
+      StrictSymbols: false
+      StrictCase: false
+      OnlyAdvanceWhenNextWordCorrect: true

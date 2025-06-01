@@ -86,6 +86,7 @@ public class PloverConnection
             Log.Info(Tag, "Connected to Plover");
             OnConnect?.Invoke();
 
+            //await SendMessage("{PLOVER:LOOKUP:PHRAEUT}");
             return true;
         }
         catch (Exception ex)
@@ -157,11 +158,13 @@ public class PloverConnection
         OnDisconnect?.Invoke();
     }
 
-    async Task SendMessage(ClientWebSocket webSocket, string message)
+    public async Task<bool> SendMessage(string message)
     {
-        var encryptedMessage = EncryptAndPackMessage(message);
+        if (webSocket == null) return false;
+        var encryptedMessage = EncryptAndPackMessage(message, false);
         var bytes = Encoding.UTF8.GetBytes(encryptedMessage);
         await webSocket.SendAsync(bytes, WebSocketMessageType.Text, true, new());
+        return true;
     }
 
     string EncryptAndPackMessage(string message)

@@ -1,0 +1,13 @@
+Name: Single syllable AOEU words drill
+Description: 
+Lessons:
+  - Name: Single syllable AOEU words drill
+    Type: words
+    Order: random
+    Prompts: snide snipe strife stripe stride style jibe squire scribe splice smile smite sprite spire spite spice swipe slight slice slide vibe vile vice vise sire sight side size glide gripe guide drive dryer dire dial dice flight knife night nice fright fried five fire file fight twice thrice tripe tribe trial trite trice tire type tile tight tide choir quite chive chide cried kite blight bribe bright bride bile bite bide plight mire mile might mice prior price pride prize pyre pipe pile wife wire wipe wile wise wide life liar light lice hype height hide rife ripe rile right rice ride ire ipe ice
+    RepeatCount: 1
+    Settings:
+      StrictSpaces: false
+      StrictSymbols: false
+      StrictCase: false
+      OnlyAdvanceWhenNextWordCorrect: true

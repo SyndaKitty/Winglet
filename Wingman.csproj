@@ -22,4 +22,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Resources\Courses\14_AOE.yaml" />
+    <None Remove="Resources\Courses\15_AOEU.yaml" />
+    <None Remove="Resources\Courses\16_AU.yaml" />
+    <None Remove="Resources\Courses\17_AE.yaml" />
+    <None Remove="Resources\Courses\18_AE_AEU_AOE.yaml" />
+    <None Remove="Resources\Courses\19_AO.yaml" />
+    <None Remove="Resources\Courses\20_Test.yaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="Resources\Courses\14_AOE.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

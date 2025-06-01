@@ -35,6 +35,7 @@ public class CourseSelection : Scene
         this.paper = paper ?? new();
         this.console = console ?? new();
         this.keyboard = keyboard ?? new KeyboardDisplay();
+        scores = [];
     }
 
     public void Load()

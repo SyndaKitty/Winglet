@@ -1,0 +1,13 @@
+Name: Single syllable AOE words drill
+Description: 
+Lessons:
+  - Name: Single syllable AOE words drill
+    Type: words
+    Order: random
+    Prompts: sneer sneeze street steer steep steel steed jeer jeep jeez squeal squeeze screed skeet smear spear spiel speed sweep sweet sleep sleet sleaze sheaf sheer sheep sheet veer veep veal seer seep seal seat seed seize grief greet grease greed gear geese dweeb deer deep deal deed fleet fleece near neap kneel neat niece need freed freeze fear feel feet feed tweet tweed tweeze thief these treat tier teal teat queer quease cleave clear cleat chief cheer cheep cheat cheese creep creel crease creed keep keel blear bleep bleat bleed brief breed breeze beef beer beep beet bead pleat plead mere meal meet peer peep peel peat piece peed weir weep weed leaf leer leap league leet lead here heap heel heat heed reef rear reap reel rete reed eve ear eep eel eat ease
+    RepeatCount: 1
+    Settings:
+      StrictSpaces: false
+      StrictSymbols: false
+      StrictCase: false
+      OnlyAdvanceWhenNextWordCorrect: true

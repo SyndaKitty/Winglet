@@ -1,0 +1,13 @@
+Name: Single syllable AE words drill
+Description: 
+Lessons:
+  - Name: Single syllable AE words drill
+    Type: words
+    Order: random
+    Prompts: stare steal shear vale sear sale great gate dear flare fare feat tear tale cheap bread bear bale beat male meat made maze pear pale peace wear lead hear heal real read ale ate 
+    RepeatCount: 1
+    Settings:
+      StrictSpaces: false
+      StrictSymbols: false
+      StrictCase: false
+      OnlyAdvanceWhenNextWordCorrect: true
