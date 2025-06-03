@@ -220,8 +220,7 @@ public static class Shared
         } 
     }
 
-    //static string[] rainbowColorsHex = ["E50000", "FF8D00", "FFEE00", "028121", "004CFF", "5541AD", "8E018E"];
-    static string[] rainbowColorsHex = ["FAB7DA", "F0C0AA", "F0E78B", "A1EBCE", "A4EAF0", "BBC1F2", "B8A5E0"];
+    static string[] rainbowColorsHex = ["E50000", "FF8D00", "FFEE00", "028121", "004CFF", "5541AD", "8E018E"];
     static Color[]? _rainbowColors;
     public static Color[] RainbowColors
     {
@@ -233,6 +232,21 @@ public static class Shared
             }
 
             return _rainbowColors;
+        }
+    }
+
+    static string[] pastelRainbowColorsHex = ["FAB7DA", "F0C0AA", "F0E78B", "A1EBCE", "A4EAF0", "BBC1F2", "B8A5E0"];
+    static Color[]? _pastelRainbowColors;
+    public static Color[] PastelRainbowColors
+    {
+        get
+        {
+            if (_pastelRainbowColors == null)
+            {
+                _pastelRainbowColors = pastelRainbowColorsHex.Select(Util.HexColor).ToArray();
+            }
+
+            return _pastelRainbowColors;
         }
     }
 

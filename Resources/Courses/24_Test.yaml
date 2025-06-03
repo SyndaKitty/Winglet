@@ -1,0 +1,13 @@
+Name: Right hand chords test
+Description: 
+Lessons:
+  - Name: Right hand chords test
+    Type: words
+    Order: random
+    Prompts: sneak snake snack snick snuck strike stream streak stroke strum struck steam steak stalk stack stoke stock stim stick stem stuck juke jam jack joke jock gym gem squeak squawk scream scram scrim scrum scheme scam skim scum smack smoke smock spike speak spook spam spoke speck swam swim swum slime sleek shroom slake slam slack slim slick slum shook shame shake sham shack shock shim shuck vac vim seem seek same sake seam psalm sam sack soak some sock sim sick sec sum suck gleam gloom glam gloam glom glock glum grime groom gram grok grim geek game gawk gum dream drake dram drum dime dike deem duke doom dame damn dam dom dock dim deck dumb duck fleek flume fluke flame flake flak flock flick fleck nuke nook name knack gnome nom knock nick neck numb freak frame frac from frock frik fume fame fake foam folk film tweak theme thick them thumb tram track trim trick trek truck time teem teak tomb toque took tame take team talk tam tack toke tom tock tim tick tech tuck yike yam yak yoke yuck quake qualm quack quick quem climb claim clam clack cloak clock click cluck chime cheek chalk choke chock chick check chum chuck crime cream creek crook creak cram crack chrome croak crock cripple crick creme crumb cook came cake calm caulk cam comb coke come kick bleak bloom blame black bloke block broom brook brake break broke brim brick bike beam beak boom book bake beam balm bam back bomb bock bum buck plume plaque plum pluck mime meme meek mook maim make mach mac mom mock mick mech mum muck prime prom prim prick pike peek puke peak palm pam pack poke pom pock pick peck wreak wrack wreck week womb wake weak walk wack woke woman wok wick lime like leek lume loom look lame lake lam leak lamb lack loam lock limb lick luck hike hook hawk ham hack home hock him hick hem heck hum huck rhyme ream reek room rook rake ram rack roam rom rock rim rum eke aim ache alm awk am ack ohm oak om um stave stove jive skeeve scav suave sleeve slave shave shove shiv solve sieve glove groove grave grove gave give drive drove dive nave five fave thrive trove cleave clove chive crave cave brave move prove peeve pave weave love live hive heave rave rove eve scathe scamp swamp swathe sloth sheath vamp south gramp growth doth damp froth faith tramp troth tamp talc clamp clothe clomp cloth champ chomp cramp camp calc comp broth bathe bath both math mouth moth path pomp lathe lamp lath loathe hath ramp romp auth amp oath 
+    RepeatCount: 1
+    Settings:
+      StrictSpaces: false
+      StrictSymbols: false
+      StrictCase: false
+      OnlyAdvanceWhenNextWordCorrect: true

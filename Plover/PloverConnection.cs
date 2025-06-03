@@ -161,7 +161,7 @@ public class PloverConnection
     public async Task<bool> SendMessage(string message)
     {
         if (webSocket == null) return false;
-        var encryptedMessage = EncryptAndPackMessage(message, false);
+        var encryptedMessage = EncryptAndPackMessage(message);
         var bytes = Encoding.UTF8.GetBytes(encryptedMessage);
         await webSocket.SendAsync(bytes, WebSocketMessageType.Text, true, new());
         return true;

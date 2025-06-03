@@ -76,7 +76,7 @@ public class Logo
             var subImage = letters[i];
 
             var white = Color.White;
-            var rainbow = Shared.RainbowColors[i];
+            var rainbow = Util.LerpColor(Shared.RainbowColors[i], Shared.PastelRainbowColors[i], .5f);
             var brightRainbow = Util.LerpColor(rainbow, Color.White, .4f);
 
             float l = .5f;

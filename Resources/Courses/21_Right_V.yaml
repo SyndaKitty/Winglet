@@ -1,0 +1,13 @@
+Name: Right hand v
+Description: 
+Lessons:
+  - Name: Right hand V
+    Type: words
+    Order: random
+    Prompts: stave stove jive skeeve scav suave sleeve slave shave shove shiv solve sieve glove groove grave grove gave give drive drove dive nave five fave thrive trove cleave clove chive crave cave brave move prove peeve pave weave love live hive heave rave rove eve 
+    RepeatCount: 1
+    Settings:
+      StrictSpaces: false
+      StrictSymbols: false
+      StrictCase: false
+      OnlyAdvanceWhenNextWordCorrect: true
