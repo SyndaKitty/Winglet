@@ -62,7 +62,7 @@ public static class Window
             }
 
             var scene = currentScene;
-            currentScene?.Update();
+            scene?.Update();
 
             BeginDrawing();
             rlImGui.Begin();

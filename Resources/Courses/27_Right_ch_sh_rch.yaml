@@ -1,0 +1,13 @@
+Name: Right hand ch sh rch/nch
+Description: 
+Lessons:
+  - Name: Right hand ch sh rch/nch
+    Type: words
+    Order: random
+    Prompts: snatch snitch stretch stitch screech scratch scooch scotch sketch splotch smooch speech switch slouch vouch such glitch grouch ditch notch fetch twitch teach touch clutch crouch crotch crutch catch coach couch ketch bleach blotch breech brooch breach broach beech beach batch botch butch mooch match much preach peach pooch patch poach pouch pitch witch leech leach latch hooch hatch hitch hutch reach roach rich retch each ouch itch etch stash josh squash squish splash splosh smash smush swoosh swish slash slosh slush sheesh shush sash gash gauche gosh gush drush dash dosh dish flash flesh flush gnash nosh fresh fish thrash trash tush quash quash clash crash creche crush cash blush brash brush bash bosh bush plush mash mosh mesh mush posh push wash wish leash lash lush hash hush rash rush ash staunch starch stench scrunch scorch smirch cinch search drench flinch finch tranche trench quench clinch clench church crunch conch branch brunch birch bench bunch march merch munch paunch parch porch pinch perch punch wrench winch wench launch larch lurch haunch hunch raunch ranch arch inch spacious vicious nauseous cautious precious luscious
+    WordCount: 100
+    Settings:
+      StrictSpaces: false
+      StrictSymbols: false
+      StrictCase: false
+      OnlyAdvanceWhenNextWordCorrect: true

@@ -5,6 +5,7 @@ Lessons:
     Type: words
     Order: random
     Prompts: far fab fat fad fop fob fog fir fib fill fit fizz fell fess fed fez fur full fuss fuzz quar quip quill quit quid quiz quell mar map mat mass mad more mop mob moll moss mod miff mill mit met mess muff mull mug mutt muss mud
+    WordCount: 75
     Settings:
       StrictSpaces: false
       StrictSymbols: false

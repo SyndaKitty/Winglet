@@ -9,7 +9,7 @@ public class CourseSelection : Scene
 
     Font primaryFont;
     List<Course> courses = [];
-    int selectedIndex = 0;
+    int selectedIndex = 1;
 
     Color standardColor = Shared.TextColor;
     Color selectedColor = Shared.AltTextColor;
@@ -58,14 +58,14 @@ public class CourseSelection : Scene
         Log.Info(Tag, "Loading score records");
         scores = LessonResult.Deserialize(File.ReadAllText(Shared.ResultFilePath));
 
-        if (scores.Count > 0)
-        {
-            var lastCourseDone = courses.FirstOrDefault(x => scores.First().LessonName == x.Lessons[0].Name);
-            if (lastCourseDone != null)
-            {
-                selectedIndex = courses.IndexOf(lastCourseDone);
-            }
-        }
+        //if (scores.Count > 0)
+        //{
+        //    var lastCourseDone = courses.LastOrDefault(x => scores.First().LessonName == x.Lessons[0].Name);
+        //    if (lastCourseDone != null)
+        //    {
+        //        selectedIndex = courses.IndexOf(lastCourseDone);
+        //    }
+        //}
         SelectNewCourse();
 
         Input.OnStenoKeys += HandleKeyInput;

@@ -5,7 +5,7 @@ Lessons:
     Type: words
     Order: random
     Prompts: stahp stall squab squall squat squad scrawl small sprawl suave swap swab swat shawl sought sauce gall gawd gauze drawl daub dawg naught fraught fraud fall fought thrall thought trough trawl tall taught yacht quad clause crawl cough call caught cause brawl brought broad ball bought baud mall pause wall watt wad laud hall rawr all aught
-    RepeatCount: 1
+    WordCount: 75
     Settings:
       StrictSpaces: false
       StrictSymbols: false

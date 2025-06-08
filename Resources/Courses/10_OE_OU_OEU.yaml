@@ -5,7 +5,7 @@ Lessons:
     Type: words
     Order: random
     Prompts: lope lobe lode lout loud hope hole hose hour howl house royal rope robe role rogue rote rose rode route rouse oil oaf oat our owl
-    RepeatCount: 2
+    WordCount: 50
     Settings:
       StrictSpaces: false
       StrictSymbols: false

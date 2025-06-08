@@ -1,0 +1,13 @@
+Name: Right hand n j lj lch
+Description: 
+Lessons:
+  - Name: Right hand n j lj lch
+    Type: words
+    Order: random
+    Prompts: squelch gulch felch bilge belch bulge mulch welch strewn strain stain stan stone stun gene gin screen scrawn scan scone skin spline spleen sprain spine spoon spawn span spin spun swine swoon swain swan shrine slain shine sheen shown shin shun vine vain vane van von sign seen soon sane sown son sin sen sun glean glan green groan grain gran groin grown grin goon gain gown gone drain drawn drone drown dine dean dune dawn down done din den flan flown noon none nan known nun frown fine feign fawn fan fin fen fun twine twain twin throne thine than thin then train tran tron tine teen tune toon tan tone town ton tin ten tun yawn queen quin clean clan clone clown colon chine chain chin croon crane crone crown keen coon cane can coin cone kin ken blown brine brain brawn bran brown been boon bane bean ban bone bon bin bun plain plane plan mine mean moon main mane man moan men preen prune prawn prone pine peen pain pane pawn pan pin pen pun wine wean wane wan won win one line lean loon lain lane lawn lan loin lone hone hon hen rain reign ran run an own stooge stage judge splodge smidge smudge sledge sludge siege sage sadge sedge grudge gauge gouge dredge drudge dodge fledge nudge fridge fudge trudge kludge cage cadge bridge beige badge bodge budge pledge midge page podge wage wodge wedge lodge ledge huge hedge rage ridge age edge
+    WordCount: 100
+    Settings:
+      StrictSpaces: false
+      StrictSymbols: false
+      StrictCase: false
+      OnlyAdvanceWhenNextWordCorrect: true

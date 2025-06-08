@@ -230,6 +230,13 @@ public static class Util
         return new Color(colorVals[0], colorVals[1], colorVals[2], colorVals[3]);
     }
 
+    public static Vector2 Rotate(Vector2 v, float degrees)
+    {
+        float radians = MathF.Sin(degrees / 180f * MathF.PI);
+        var c = MathF.Cos(radians);
+        var s = MathF.Sin(radians);
+        return new Vector2(v.X * c - v.Y * s, v.X * s + v.Y * c);
+    }
 
     // Note: Something is wrong about this implementation
     /// <summary>

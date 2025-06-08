@@ -74,6 +74,14 @@ public class ScoreGraph
             {
                 var l = lastPoint.Value;
                 Raylib.DrawLine(l.X, l.Y, x, y, Color.White);
+                
+                Vector2 diff = new(l.X - x, l.Y - y);
+                diff = Vector2.Normalize(diff) * 25f;
+                var a = Util.Rotate(diff, 45);
+                Raylib.DrawLine(x, y, x + (int)a.X, y + (int)a.Y, Color.White);
+                
+                var b = Util.Rotate(diff, -45);
+                Raylib.DrawLine(x, y, x + (int)b.X, y + (int)b.Y, Color.White);
             }
             lastPoint = new Vector2Int(x, y);
         }
@@ -90,6 +98,8 @@ public class ScoreGraph
         {
             var y = (int)Util.Map(a, startAccuracy, endAccuracy, bottomRight.Y, topLeft.Y);
             Raylib.DrawLine((int)topLeft.X, y, (int)bottomRight.X, y, Color.White);
+            string text = ((int)(a * 100)).ToString();
+            Util.DrawText(font, text, new Vector2(topLeft.X - Util.GetTextWidth(text, font), y - font.BaseSize), Color.White);
         }
 
         Raylib.DrawRectangleLinesEx(new Rectangle(pos, size), 1f, Color.White);

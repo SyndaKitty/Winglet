@@ -27,13 +27,15 @@ public class CourseLesson
     public LessonType Type { get; set; }
     public LessonOrder Order { get; set; }
     public string? Prompts { get; set; }
-    public int RepeatCount { get; set; } = 1;
     public LessonSettings Settings { get; set; }
+    public int WordCount { get; set; } = 1;
 
     public List<string> GetWords()
     {
+        if (Prompts == null || Prompts.Length == 0) return [];
+
         List<string> finalList = [];
-        for(int i = 0; i < RepeatCount; i++)
+        while (finalList.Count < WordCount)
         {
             var words = Prompts?.Split(" ", StringSplitOptions.RemoveEmptyEntries) ?? [];
             if (Order == LessonOrder.Random)
@@ -42,6 +44,11 @@ public class CourseLesson
                 ApplyEasterEggs(words);
             }
             finalList.AddRange(words);
+        }
+
+        if (WordCount > 1)
+        {
+            finalList = finalList.Take(WordCount).ToList();
         }
 
         return finalList;

@@ -5,7 +5,7 @@ Lessons:
     Type: words
     Order: random
     Prompts: gaffe gap gal gag gat gas gad gore gob got god give gill gig git get guess gull gut nap nab nag nor knob not nod nip nil knit net nub null nut yip yep yell yet yes yup
-    RepeatCount: 2
+    WordCount: 75
     Settings:
       StrictSpaces: false
       StrictSymbols: false

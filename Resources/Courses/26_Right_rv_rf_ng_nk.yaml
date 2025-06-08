@@ -1,0 +1,13 @@
+Name: Right hand rv rg ng nk
+Description: 
+Lessons:
+  - Name: Right hand rv rg ng nk
+    Type: words
+    Order: random
+    Prompts: starve swerve verve serve nerve carve curve perve scarf scurf smurf serf surf dwarf nerf turf morph perf wharf strange strong string strung sting stung scrounge splunge sprang spring sprung spang sponge swing swung slang sling slung sang song sing sung grange grunge gang gong dang dong ding dung flange fling flung fringe fang fung twinge throng thing tang tong tinge tung young clang cling clung change cringe king bling bring brung bang boing bong binge bung plunge mange mung prang prong pang pong ping wang lang lounge long ling lung hang hinge hung range rang ring rung eng stank stonk stink stunk jank junk skank skink skunk swank slink shrank shrink shrunk shank sank sink sunk gunk drank drink drunk dank dunk flunk frank fink funk twink thank thonk think thunk trunk tank yank clank clink clunk chunk crank blank blink brink bank bonk bunk plank plonk plink plunk monk mink prank pink punk wank wonk wink lank link hank honk hunk rank rink ink
+    WordCount: 100
+    Settings:
+      StrictSpaces: false
+      StrictSymbols: false
+      StrictCase: false
+      OnlyAdvanceWhenNextWordCorrect: true
